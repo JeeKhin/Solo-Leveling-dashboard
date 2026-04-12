@@ -117,7 +117,7 @@
   .sprint-time {
     font-family: 'Rajdhani', sans-serif;
     font-size: 13px;
-    color: var(--text-muted);
+    color: var(--text-primary);
     letter-spacing: 2px;
   }
 
@@ -147,7 +147,7 @@
     font-size: 10px;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: var(--text-muted);
+    color: var(--text-primary);
     display: flex;
     align-items: center;
     gap: 4px;
@@ -209,7 +209,7 @@
   .cp-xp-text {
     font-family: 'Rajdhani', sans-serif;
     font-size: 11px;
-    color: var(--text-muted);
+    color: var(--text-primary);
     letter-spacing: 1px;
   }
 
@@ -226,7 +226,7 @@
     font-size: 11px;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: var(--text-muted);
+    color: var(--text-primary);
     background: rgba(255,255,255,0.02);
   }
 
@@ -344,15 +344,90 @@
     color: var(--accent-cyan);
     white-space: nowrap;
   }
-  .habit-time-badge {
-    font-size: 10px;
+
+  /* ─── TICK TIME ─── */
+  .tick-time-badge {
+    font-family: 'Orbitron', monospace;
+    font-size: 9px;
+    color: var(--text-secondary);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    padding: 2px 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .tick-time-badge:hover {
+    background: rgba(0,212,255,0.1);
+    border-color: rgba(0,212,255,0.3);
+    color: var(--accent-cyan);
+  }
+  .tick-time-badge.no-time {
     color: var(--text-muted);
-    background: rgba(255,255,255,0.04);
-    padding: 2px 7px;
-    border-radius: 10px;
+    border-style: dashed;
     font-family: 'Rajdhani', sans-serif;
+    font-size: 9px;
     letter-spacing: 0.5px;
   }
+
+  .time-popover {
+    position: fixed;
+    background: #1a1d28;
+    border: 1px solid rgba(0,212,255,0.25);
+    border-radius: 12px;
+    padding: 14px 16px;
+    z-index: 3000;
+    min-width: 220px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    animation: popIn 0.15s ease-out;
+  }
+  @keyframes popIn {
+    from { opacity:0; transform:scale(0.95) translateY(4px); }
+    to   { opacity:1; transform:scale(1) translateY(0); }
+  }
+  .time-popover-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+  }
+  .time-popover-input {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    padding: 8px 10px;
+    outline: none;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+  .time-popover-input:focus { border-color: var(--accent-cyan); }
+  .time-popover-actions { display: flex; gap: 8px; }
+  .tpa-btn {
+    flex: 1;
+    padding: 7px 6px;
+    border-radius: 8px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid;
+  }
+  .tpa-save { background:rgba(0,212,255,0.12); border-color:rgba(0,212,255,0.3); color:var(--accent-cyan); }
+  .tpa-save:hover { background:rgba(0,212,255,0.22); }
+  .tpa-clear { background:rgba(239,68,68,0.08); border-color:rgba(239,68,68,0.25); color:#ef4444; }
+  .tpa-clear:hover { background:rgba(239,68,68,0.16); }
+  .tpa-cancel { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.08); color:var(--text-secondary); }
+  .tpa-cancel:hover { background:rgba(255,255,255,0.08); }
 
   /* ─── END DAY BUTTON ─── */
   .end-day-section {
@@ -395,7 +470,7 @@
     font-size: 11px;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: var(--text-muted);
+    color: var(--text-primary);
     margin-bottom: 12px;
     display: flex;
     align-items: center;
@@ -416,7 +491,7 @@
     font-size: 10px;
     letter-spacing: 1.5px;
     text-transform: uppercase;
-    color: var(--text-muted);
+    color: var(--text-primary);
   }
   .sleep-input-group input {
     background: rgba(255,255,255,0.04);
@@ -495,15 +570,32 @@
     padding: 20px;
     overflow-y: auto;
   }
-  .modal-overlay.active { display: flex; align-items: flex-start; justify-content: center; padding-top: 40px; }
+  .modal-overlay.active { display: flex; align-items: flex-start; justify-content: center; padding-top: 20px; padding-bottom: 20px; }
   .modal {
     background: var(--bg-card2);
     border: 1px solid var(--border);
     border-radius: 16px;
-    padding: 24px;
     width: 100%;
-    max-width: 540px;
+    max-width: 560px;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 40px);
+  }
+  .modal-header {
+    padding: 22px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .modal-body {
+    padding: 0 24px 8px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .modal-footer {
+    padding: 14px 24px 20px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
   }
   .modal-title {
     font-family: 'Rajdhani', sans-serif;
@@ -512,12 +604,12 @@
     letter-spacing: 3px;
     text-transform: uppercase;
     color: var(--text-primary);
-    margin-bottom: 20px;
+    margin-bottom: 0;
   }
   .modal-close {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 18px;
+    right: 18px;
     background: none;
     border: none;
     color: var(--text-muted);
@@ -530,11 +622,13 @@
   .edit-habit-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px 0;
+    gap: 8px;
+    padding: 7px 0;
     border-bottom: 1px solid var(--border);
   }
   .edit-habit-row:last-child { border-bottom: none; }
+  .edit-group-container { margin-bottom: 4px; }
+  .edit-group-container .edit-habit-row:last-child { border-bottom: 1px solid var(--border); }
   .edit-habit-name {
     flex: 1;
     background: rgba(255,255,255,0.04);
@@ -1150,12 +1244,19 @@
 <!-- ═══════════════════════════════ EDIT MODAL ═══════════════════════════════ -->
 <div class="modal-overlay" id="edit-modal">
   <div class="modal">
-    <div class="modal-title">Edit Habits</div>
-    <button class="modal-close" onclick="closeEditModal()">✕</button>
-    <div id="edit-habit-list"></div>
-    <div class="modal-actions">
-      <button class="btn-secondary" onclick="closeEditModal()">Cancel</button>
-      <button class="btn-primary" onclick="saveHabits()">Save Changes</button>
+    <div class="modal-header">
+      <div class="modal-title" style="margin-bottom:0">Edit Habits & XP</div>
+      <div style="font-family:'Rajdhani',sans-serif;font-size:11px;color:var(--text-muted);letter-spacing:1px;margin-top:4px;">Add, remove or rename habits. Set XP weight. Toggle WD for weekday-only.</div>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="edit-habit-list"></div>
+    </div>
+    <div class="modal-footer">
+      <div class="modal-actions" style="margin-top:0">
+        <button class="btn-secondary" onclick="closeEditModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveHabits()">Save Changes</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1183,25 +1284,54 @@
 const DEFAULT_HABITS = [
   { id:'god',       name:'Spend time with God',   xp:10,   group:'Spirit',   weekdayOnly:false },
   { id:'workout',   name:'Workout',               xp:15,   group:'Body',     weekdayOnly:false },
-  { id:'reading',   name:'Reading',               xp:10,   group:'Mind',     weekdayOnly:false },
-  { id:'work',      name:'Leave Work On Time',    xp:10,   group:'Work',     weekdayOnly:true  },
+  { id:'breakfast', name:'Breakfast',             xp:5,    group:'Body',     weekdayOnly:false },
   { id:'shower',    name:'Shower',                xp:5,    group:'Body',     weekdayOnly:false },
+  { id:'reading',   name:'Reading',               xp:10,   group:'Mind',     weekdayOnly:false },
+  { id:'work',      name:'Leave Work On Time',    xp:5,    group:'Work',     weekdayOnly:true  },
+  { id:'reachwork', name:'Reached Work On Time',  xp:5,    group:'Work',     weekdayOnly:true  },
   { id:'sleep12',   name:'Sleep before 12 am',   xp:10,   group:'Recovery', weekdayOnly:false },
   { id:'water1',    name:'Water 0.5L',            xp:3.75, group:'Hydration',weekdayOnly:false, waterTier:1 },
   { id:'water2',    name:'Water 1L',              xp:3.75, group:'Hydration',weekdayOnly:false, waterTier:2 },
   { id:'water3',    name:'Water 1.5L',            xp:3.75, group:'Hydration',weekdayOnly:false, waterTier:3 },
   { id:'water4',    name:'Water 2L',              xp:3.75, group:'Hydration',weekdayOnly:false, waterTier:4 },
-  { id:'instagram', name:'Instagram',             xp:5,    group:'Wins',     weekdayOnly:false },
-  { id:'youtube',   name:'YouTube',               xp:5,    group:'Wins',     weekdayOnly:false },
-  { id:'gaming',    name:'Gaming',                xp:5,    group:'Wins',     weekdayOnly:false },
-  { id:'movie',     name:'Movie',                 xp:5,    group:'Wins',     weekdayOnly:false },
-  { id:'breakfast', name:'Breakfast',             xp:5,    group:'Body',     weekdayOnly:false },
+  { id:'instagram', name:'Instagram',             xp:1.25, group:'Wins',     weekdayOnly:false, bonus:true },
+  { id:'youtube',   name:'YouTube',               xp:1.25, group:'Wins',     weekdayOnly:false, bonus:true },
+  { id:'gaming',    name:'Gaming',                xp:1.25, group:'Wins',     weekdayOnly:false, bonus:true },
+  { id:'movie',     name:'Movie',                 xp:1.25, group:'Wins',     weekdayOnly:false, bonus:true },
 ];
 
-// Weekend XP distribution: the 10 XP from 'Leave Work On Time' is split
-// evenly (+2.5 XP each) across: god, shower, breakfast, sleep12
-const WEEKEND_BONUS_RECEIVERS = ['god','shower','breakfast','sleep12'];
-const WEEKEND_BONUS_PER_HABIT = 2.5; // 10 XP / 4 habits
+// ═══════════════════════════════════════════════════════
+// WEEKEND BONUS DISTRIBUTION CONFIG
+// Stored in localStorage as 'hd_wkend_cfg'
+// Shape: { sourceIds: ['work','reachwork'], receiverIds: ['god','shower','breakfast','sleep12'] }
+// The total XP of all sourceIds is summed and split equally among receiverIds on weekends.
+// ═══════════════════════════════════════════════════════
+const DEFAULT_WEEKEND_CFG = {
+  sourceIds:   ['work', 'reachwork'],
+  receiverIds: ['god', 'shower', 'breakfast', 'sleep12']
+};
+
+function getWeekendCfg() {
+  try {
+    const raw = localStorage.getItem('hd_wkend_cfg');
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { ...DEFAULT_WEEKEND_CFG };
+}
+function saveWeekendCfg(cfg) {
+  localStorage.setItem('hd_wkend_cfg', JSON.stringify(cfg));
+}
+
+/** How many XP each receiver gets on a weekend, based on CURRENT habit XP values */
+function getWeekendBonusPerReceiver(habits) {
+  const cfg = getWeekendCfg();
+  const totalSourceXP = habits
+    .filter(h => cfg.sourceIds.includes(h.id))
+    .reduce((s, h) => s + h.xp, 0);
+  const receiverCount = cfg.receiverIds.length;
+  if (receiverCount === 0 || totalSourceXP === 0) return 0;
+  return Math.round((totalSourceXP / receiverCount) * 10000) / 10000;
+}
 
 function todayKey() {
   const d = new Date();
@@ -1273,17 +1403,11 @@ function checkAutoReset(now) {
       lastResetDate = key;
       localStorage.setItem('hd_last_reset', key);
       if (state.lastDate && state.lastDate !== key) {
-        // Save yesterday's final score to history if not already done
-        const history = getHistory();
-        if (!history[state.lastDate] && state.checked) {
-          const habits = getHabits();
-          const xp = computeXP(state.checked, state.lastDate, habits);
-          const maxXP = getMaxXP(state.lastDate, habits);
-          history[state.lastDate] = { xp, maxXP, pct: Math.round(xp/maxXP*100), checked: state.checked };
-          saveHistory(history);
-        }
+        // Always save yesterday's score if it's missing (covers the "forgot to end day" case)
+        autoSaveYesterdayIfMissed(state.lastDate, state);
       }
       state.checked = {};
+      state.tickTimes = {};
       state.locked = false;
       state.lastDate = key;
       saveState(state);
@@ -1294,11 +1418,32 @@ function checkAutoReset(now) {
 }
 
 function checkAutoEndDay(now) {
-  if (now.getHours() === 0 && now.getMinutes() === 0) {
+  // Auto-save at 23:59 every day so scores are never lost
+  if (now.getHours() === 23 && now.getMinutes() === 59) {
     const state = getState();
     if (!state.locked && state.lastDate === todayKey()) {
       endDay();
+      showToast('Auto-saved at 11:59pm 🔒');
     }
+  }
+}
+
+function autoSaveYesterdayIfMissed(yesterdayKey, state) {
+  // Called at 6am reset: save yesterday's score if missing (covers "forgot to end day" case)
+  const history = getHistory();
+  if (!history[yesterdayKey]) {
+    const habits = getHabits();
+    const checked = state.checked || {};
+    const tickTimes = state.tickTimes || {};
+    const normalXP  = computeNormalXP(checked, yesterdayKey, habits);
+    const normalMax = getNormalMaxXP(yesterdayKey, habits);
+    const bonusXP   = computeXP(checked, yesterdayKey, habits) - normalXP;
+    const pct = normalMax > 0 ? Math.min(100, Math.round(normalXP / normalMax * 100)) : 0;
+    history[yesterdayKey] = {
+      xp: normalXP + bonusXP, normalXP, bonusXP, maxXP: normalMax, pct,
+      checked: {...checked}, tickTimes: {...tickTimes}, autoSaved: true
+    };
+    saveHistory(history);
   }
 }
 
@@ -1313,31 +1458,62 @@ function isWeekend(dateStr) {
 }
 
 function getEffectiveXP(habit, dateStr, habits) {
-  // Returns the effective XP value for a habit on a given day (accounting for weekend bonus)
+  // Returns the XP a habit contributes on a given day.
+  // Weekend source habits contribute 0 (weekdayOnly).
+  // Weekend receiver habits get bonus on top of their base XP.
   const weekend = isWeekend(dateStr);
   if (habit.weekdayOnly && weekend) return 0;
+  if (habit.bonus) return habit.xp;
   let xp = habit.xp;
-  if (weekend && WEEKEND_BONUS_RECEIVERS.includes(habit.id)) {
-    xp += WEEKEND_BONUS_PER_HABIT;
+  if (weekend) {
+    const cfg = getWeekendCfg();
+    if (cfg.receiverIds.includes(habit.id)) {
+      xp += getWeekendBonusPerReceiver(habits);
+    }
   }
   return xp;
 }
 
 function fmtXP(val) {
-  // Format decimal XP nicely: show 1 decimal only when needed
+  // Format decimal XP nicely: show decimal only when needed
   return (Math.round(val * 100) / 100) % 1 === 0 ? val.toFixed(0) : val.toFixed(2).replace(/\.?0+$/, '');
 }
 
+function getNormalMaxXP(dateStr, habits) {
+  // Max XP from non-bonus habits only
+  return habits
+    .filter(h => !h.bonus)
+    .reduce((s, h) => s + getEffectiveXP(h, dateStr, habits), 0);
+}
+
 function getMaxXP(dateStr, habits) {
+  // Total possible XP = normal + bonus
   return habits.reduce((s, h) => s + getEffectiveXP(h, dateStr, habits), 0);
 }
 
+function isNormal100(checked, dateStr, habits) {
+  // Returns true if all non-bonus, non-disabled habits are checked
+  const weekend = isWeekend(dateStr);
+  const normalHabits = habits.filter(h => !h.bonus && !(h.weekdayOnly && weekend));
+  return normalHabits.every(h => checked && checked[h.id]);
+}
+
 function computeXP(checked, dateStr, habits) {
+  const normalFull = isNormal100(checked, dateStr, habits);
   let xp = 0;
   habits.forEach(h => {
-    if (checked && checked[h.id]) {
-      xp += getEffectiveXP(h, dateStr, habits);
-    }
+    if (!checked || !checked[h.id]) return;
+    if (h.bonus && !normalFull) return; // bonus XP locked until 100% normal done
+    xp += getEffectiveXP(h, dateStr, habits);
+  });
+  return Math.round(xp * 100) / 100;
+}
+
+function computeNormalXP(checked, dateStr, habits) {
+  // XP from non-bonus habits only (for progress bar base)
+  let xp = 0;
+  habits.filter(h => !h.bonus).forEach(h => {
+    if (checked && checked[h.id]) xp += getEffectiveXP(h, dateStr, habits);
   });
   return Math.round(xp * 100) / 100;
 }
@@ -1357,47 +1533,84 @@ function renderHabits() {
   const habits = getHabits();
   const state = getState();
   const checked = state.checked || {};
+  const tickTimes = state.tickTimes || {};
   const locked = !!state.locked;
   const today = todayKey();
   const weekend = isWeekend(today);
+  const normal100 = isNormal100(checked, today, habits); // whether bonus XP is unlocked
 
   const groups = groupHabits(habits);
   let groupIdx = 1;
 
   Object.entries(groups).forEach(([groupName, groupHabits]) => {
-    const groupXP = groupHabits.reduce((s,h) => s + (checked[h.id] ? getEffectiveXP(h, today, habits) : 0), 0);
+    const isWinsGroup = groupHabits.every(h => h.bonus);
+
+    // Group XP: bonus habits only count if normal100
+    const groupXP = groupHabits.reduce((s,h) => {
+      if (!checked[h.id]) return s;
+      if (h.bonus && !normal100) return s;
+      return s + getEffectiveXP(h, today, habits);
+    }, 0);
     const groupMaxXP = groupHabits.reduce((s,h) => s + getEffectiveXP(h, today, habits), 0);
 
     const groupEl = document.createElement('div');
     groupEl.className = 'habit-group';
+
+    // Wins group gets a gold-tinted header and a lock indicator
+    const bonusLockHtml = isWinsGroup
+      ? `<span style="font-size:10px;color:${normal100 ? 'var(--accent-gold)' : 'var(--text-muted)'};margin-left:6px;font-family:'Rajdhani',sans-serif;letter-spacing:1px;">${normal100 ? '⭐ UNLOCKED' : '🔒 REACH 100%'}</span>`
+      : '';
+
     groupEl.innerHTML = `
-      <div class="habit-group-header" onclick="toggleGroup(this)">
+      <div class="habit-group-header" onclick="toggleGroup(this)" style="${isWinsGroup ? 'border-bottom-color:rgba(201,162,39,0.15)' : ''}">
         <div class="group-left">
           <span class="group-num">${groupIdx}</span>
-          <span class="group-name">${groupName}</span>
+          <span class="group-name" style="${isWinsGroup ? 'color:var(--accent-gold)' : ''}">${groupName}</span>
+          ${bonusLockHtml}
         </div>
         <div class="group-right">
-          <span class="group-progress-text">${fmtXP(groupXP)}/${fmtXP(groupMaxXP)} XP</span>
+          <span class="group-progress-text" style="${isWinsGroup ? 'color:var(--accent-gold)' : ''}">${fmtXP(groupXP)}/${fmtXP(groupMaxXP)} XP</span>
           <span class="group-chevron">▼</span>
         </div>
       </div>
-      <div class="habit-group-body"></div>
+      <div class="habit-group-body" style="${isWinsGroup ? 'background:rgba(201,162,39,0.02)' : ''}"></div>
     `;
 
     const body = groupEl.querySelector('.habit-group-body');
     groupHabits.forEach(h => {
-      const isDisabled = h.weekdayOnly && weekend;
+      const isDisabled = (h.weekdayOnly && weekend) || (h.bonus && !normal100 && !locked);
       const isChecked = !!checked[h.id];
       const effectiveXP = getEffectiveXP(h, today, habits);
-      const hasBonus = weekend && WEEKEND_BONUS_RECEIVERS.includes(h.id);
+      const hasWeekendBonus = weekend && getWeekendCfg().receiverIds.includes(h.id);
+      const tickTime = tickTimes[h.id] || null;
+
       const item = document.createElement('div');
-      item.className = `habit-item${isChecked?' completed':''}${isDisabled?' disabled':''}${h.waterTier?' water-tier':''}`;
+      // bonus habits dim when locked (not 100%)
+      const bonusDimmed = h.bonus && !normal100;
+      item.className = `habit-item${isChecked && !bonusDimmed?' completed':''}${(h.weekdayOnly && weekend)?' disabled':''}${h.waterTier?' water-tier':''}`;
+      if (bonusDimmed) item.style.opacity = '0.35';
+
+      let timeBadgeHtml = '';
+      if (isChecked) {
+        if (tickTime) {
+          timeBadgeHtml = `<span class="tick-time-badge" title="Tapped at ${tickTime} — click to edit" onclick="event.stopPropagation();openTimePopover(event,'${h.id}')">${tickTime}</span>`;
+        } else {
+          timeBadgeHtml = `<span class="tick-time-badge no-time" title="No time recorded — click to set" onclick="event.stopPropagation();openTimePopover(event,'${h.id}')">set time</span>`;
+        }
+      }
+
+      const xpColor = h.bonus ? 'color:var(--accent-gold)' : '';
+      const bonusStar = h.bonus ? '<span style="font-size:9px;color:var(--accent-gold);margin-right:2px;">⭐</span>' : '';
+
       item.innerHTML = `
-        <div class="habit-checkbox${isChecked?' checked':''}" data-id="${h.id}" onclick="${locked || isDisabled ? '' : `toggleHabit('${h.id}')`}" style="${locked||isDisabled?'cursor:default':''}"></div>
+        <div class="habit-checkbox${isChecked?' checked':''}${h.bonus?' bonus-check':''}" data-id="${h.id}"
+          onclick="${locked || (h.weekdayOnly && weekend) ? '' : `toggleHabit('${h.id}')`}"
+          style="${locked||(h.weekdayOnly&&weekend)?'cursor:default':''};${h.bonus&&isChecked?'background:var(--accent-gold);border-color:var(--accent-gold);box-shadow:0 0 12px rgba(201,162,39,0.5)':''}"></div>
         <span class="habit-name">${h.name}</span>
         ${h.weekdayOnly ? '<span class="weekday-only-badge">Weekday</span>' : ''}
-        ${hasBonus ? `<span class="weekday-only-badge" style="color:var(--accent-green);border-color:rgba(0,230,118,0.3);background:rgba(0,230,118,0.08)">+Bonus</span>` : ''}
-        <span class="habit-xp">+${fmtXP(effectiveXP)} XP</span>
+        ${hasWeekendBonus ? `<span class="weekday-only-badge" style="color:var(--accent-green);border-color:rgba(0,230,118,0.3);background:rgba(0,230,118,0.08)">+${fmtXP(getWeekendBonusPerReceiver(habits))} WE</span>` : ''}
+        ${timeBadgeHtml}
+        ${bonusStar}<span class="habit-xp" style="${xpColor}">+${fmtXP(effectiveXP)} XP</span>
       `;
       body.appendChild(item);
     });
@@ -1407,7 +1620,18 @@ function renderHabits() {
   });
 
   // Lock state
-  document.getElementById('locked-banner').classList.toggle('active', locked);
+  const bannerEl = document.getElementById('locked-banner');
+  bannerEl.classList.toggle('active', locked);
+  if (locked) {
+    const history = getHistory();
+    const todayData = history[today];
+    const autoSaved = todayData && todayData.autoSaved;
+    const bonusXP = todayData && todayData.bonusXP ? todayData.bonusXP : 0;
+    const bonusTxt = bonusXP > 0 ? ` + ${fmtXP(bonusXP)}⭐ bonus` : '';
+    bannerEl.textContent = autoSaved
+      ? `⏱ Auto-saved at 11:59pm${bonusTxt} — scores locked for the day.`
+      : `🔒 Day Locked${bonusTxt} — Scores are saved. See you tomorrow!`;
+  }
   document.getElementById('end-day-btn').disabled = locked;
 }
 
@@ -1415,9 +1639,104 @@ function toggleGroup(header) {
   header.closest('.habit-group').classList.toggle('collapsed');
 }
 
+// ═══════════════════════════════════════════════════════
+// TICK-TIME POPOVER
+// ═══════════════════════════════════════════════════════
+
+let _popoverHabitId = null;
+
+function openTimePopover(event, habitId) {
+  closeTimePopover();
+  _popoverHabitId = habitId;
+
+  const state = getState();
+  const currentTime = (state.tickTimes || {})[habitId] || '';
+
+  const pop = document.createElement('div');
+  pop.className = 'time-popover';
+  pop.id = 'time-popover';
+
+  const habits = getHabits();
+  const habit = habits.find(h => h.id === habitId);
+
+  pop.innerHTML = `
+    <div class="time-popover-title">${habit ? habit.name : 'Habit'} — tick time</div>
+    <input class="time-popover-input" id="popover-time-input" type="time" value="${currentTime}" placeholder="HH:MM">
+    <div style="font-size:11px;color:var(--text-muted);font-family:'Rajdhani',sans-serif;margin-bottom:10px;letter-spacing:0.5px;">
+      Leave blank or clear to remove the recorded time.
+    </div>
+    <div class="time-popover-actions">
+      <button class="tpa-btn tpa-save" onclick="saveTickTime()">Save</button>
+      <button class="tpa-btn tpa-clear" onclick="clearTickTime()">Clear</button>
+      <button class="tpa-btn tpa-cancel" onclick="closeTimePopover()">Cancel</button>
+    </div>
+  `;
+
+  document.body.appendChild(pop);
+
+  // Position near the click, keeping within viewport
+  const x = Math.min(event.clientX, window.innerWidth - 240);
+  const y = event.clientY + 10;
+  pop.style.left = x + 'px';
+  pop.style.top = (y + pop.offsetHeight > window.innerHeight ? event.clientY - pop.offsetHeight - 10 : y) + 'px';
+
+  // Focus input
+  setTimeout(() => {
+    const inp = document.getElementById('popover-time-input');
+    if (inp) inp.focus();
+  }, 50);
+
+  // Close on outside click
+  setTimeout(() => {
+    document.addEventListener('click', _outsidePopoverClick);
+  }, 10);
+}
+
+function _outsidePopoverClick(e) {
+  const pop = document.getElementById('time-popover');
+  if (pop && !pop.contains(e.target)) closeTimePopover();
+}
+
+function closeTimePopover() {
+  const pop = document.getElementById('time-popover');
+  if (pop) pop.remove();
+  document.removeEventListener('click', _outsidePopoverClick);
+  _popoverHabitId = null;
+}
+
+function saveTickTime() {
+  if (!_popoverHabitId) return;
+  const input = document.getElementById('popover-time-input');
+  const val = input ? input.value.trim() : '';
+  const state = getState();
+  if (!state.tickTimes) state.tickTimes = {};
+  if (val) {
+    state.tickTimes[_popoverHabitId] = val;
+    showToast('Time updated ✓');
+  } else {
+    delete state.tickTimes[_popoverHabitId];
+    showToast('Time cleared');
+  }
+  saveState(state);
+  closeTimePopover();
+  renderHabits();
+}
+
+function clearTickTime() {
+  if (!_popoverHabitId) return;
+  const state = getState();
+  if (!state.tickTimes) state.tickTimes = {};
+  delete state.tickTimes[_popoverHabitId];
+  saveState(state);
+  showToast('Time cleared');
+  closeTimePopover();
+  renderHabits();
+}
+
 function toggleHabit(id) {
   const state = getState();
   if (!state.checked) state.checked = {};
+  if (!state.tickTimes) state.tickTimes = {};
   if (!state.lastDate) state.lastDate = todayKey();
 
   const habits = getHabits();
@@ -1427,21 +1746,32 @@ function toggleHabit(id) {
   if (habit && habit.waterTier) {
     const tier = habit.waterTier;
     const isChecked = !!state.checked[id];
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
     if (!isChecked) {
-      // Check all tiers up to this one
       for (let t = 1; t <= tier; t++) {
         const wh = habits.find(h => h.waterTier === t);
-        if (wh) state.checked[wh.id] = true;
+        if (wh) {
+          if (!state.checked[wh.id]) state.tickTimes[wh.id] = timeStr;
+          state.checked[wh.id] = true;
+        }
       }
     } else {
-      // Uncheck this and all tiers above
       for (let t = tier; t <= 4; t++) {
         const wh = habits.find(h => h.waterTier === t);
-        if (wh) state.checked[wh.id] = false;
+        if (wh) { state.checked[wh.id] = false; delete state.tickTimes[wh.id]; }
       }
     }
   } else {
-    state.checked[id] = !state.checked[id];
+    const isChecked = !!state.checked[id];
+    if (!isChecked) {
+      const now = new Date();
+      state.tickTimes[id] = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+      state.checked[id] = true;
+    } else {
+      state.checked[id] = false;
+      delete state.tickTimes[id];
+    }
   }
 
   saveState(state);
@@ -1458,27 +1788,48 @@ function updateProgress() {
   const state = getState();
   const habits = getHabits();
   const today = todayKey();
-  const xp = computeXP(state.checked, today, habits);
-  const maxXP = getMaxXP(today, habits);
-  const pct = maxXP > 0 ? Math.min(100, Math.round(xp / maxXP * 100)) : 0;
+  const normalXP   = computeNormalXP(state.checked, today, habits);
+  const normalMax  = getNormalMaxXP(today, habits);
+  const bonusXP    = computeXP(state.checked, today, habits) - normalXP;
+  const totalXP    = normalXP + bonusXP;
 
-  // Circular progress
+  // Progress ring is based on normal habits 0→100%, then bonus pushes beyond
+  const normalPct = normalMax > 0 ? Math.min(100, Math.round(normalXP / normalMax * 100)) : 0;
+  const hasBonusXP = bonusXP > 0;
+
+  // Circular progress shows normal % (ring maxes at 100 from normal, then glows gold for bonus)
   const circumference = 2 * Math.PI * 54;
-  const offset = circumference - (pct / 100) * circumference;
-  document.getElementById('cp-fill').style.strokeDashoffset = offset;
-  document.getElementById('cp-percent').textContent = pct + '%';
-  document.getElementById('cp-xp-text').textContent = `${fmtXP(xp)} / ${fmtXP(maxXP)} XP`;
+  const offset = circumference - (normalPct / 100) * circumference;
+  const fillEl = document.getElementById('cp-fill');
+  fillEl.style.strokeDashoffset = offset;
+  fillEl.style.stroke = hasBonusXP ? 'var(--accent-gold)' : 'var(--accent-cyan)';
+  fillEl.style.filter = hasBonusXP
+    ? 'drop-shadow(0 0 6px rgba(201,162,39,0.8))'
+    : 'drop-shadow(0 0 6px rgba(0,212,255,0.6))';
+
+  const dotEl = document.getElementById('cp-dot');
+  dotEl.style.fill = hasBonusXP ? 'var(--accent-gold)' : 'var(--accent-cyan)';
+
+  document.getElementById('cp-percent').textContent = normalPct + '%';
+  document.getElementById('cp-percent').style.color = hasBonusXP ? 'var(--accent-gold)' : 'var(--accent-cyan)';
+
+  // XP text: show normal + bonus breakdown if bonus is active
+  if (hasBonusXP) {
+    document.getElementById('cp-xp-text').textContent = `${fmtXP(normalXP)} + ${fmtXP(bonusXP)}⭐ / ${fmtXP(normalMax)} XP`;
+  } else {
+    document.getElementById('cp-xp-text').textContent = `${fmtXP(normalXP)} / ${fmtXP(normalMax)} XP`;
+  }
 
   // Dot position
-  const angle = (pct / 100) * 360 - 90;
+  const angle = (normalPct / 100) * 360 - 90;
   const rad = (angle * Math.PI) / 180;
   const cx = 60 + 54 * Math.cos(rad);
   const cy = 60 + 54 * Math.sin(rad);
   document.getElementById('cp-dot').setAttribute('cx', cx);
   document.getElementById('cp-dot').setAttribute('cy', cy);
 
-  // Stats
-  document.getElementById('stat-xp').textContent = fmtXP(xp);
+  // Stats — XP stat shows total including bonus
+  document.getElementById('stat-xp').textContent = fmtXP(totalXP);
   updateStreakDisplay();
   updateWeekDisplay();
   updateSettings();
@@ -1550,17 +1901,24 @@ function updateSettings() {
 // END DAY
 // ═══════════════════════════════════════════════════════
 
-function endDay() {
+function endDay(silent) {
   const state = getState();
   if (state.locked) return;
   const habits = getHabits();
   const today = todayKey();
-  const xp = computeXP(state.checked, today, habits);
-  const maxXP = getMaxXP(today, habits);
-  const pct = maxXP > 0 ? Math.round(xp / maxXP * 100) : 0;
+  const normalXP  = computeNormalXP(state.checked, today, habits);
+  const normalMax = getNormalMaxXP(today, habits);
+  const bonusXP   = computeXP(state.checked, today, habits) - normalXP;
+  const totalXP   = normalXP + bonusXP;
+  // pct is based on normal only (100% = all normal habits done)
+  const pct = normalMax > 0 ? Math.min(100, Math.round(normalXP / normalMax * 100)) : 0;
 
   const history = getHistory();
-  history[today] = { xp, maxXP, pct, checked: {...(state.checked||{})} };
+  history[today] = {
+    xp: totalXP, normalXP, bonusXP, maxXP: normalMax, pct,
+    checked: {...(state.checked||{})},
+    tickTimes: {...(state.tickTimes||{})}
+  };
   saveHistory(history);
 
   state.locked = true;
@@ -1568,7 +1926,7 @@ function endDay() {
 
   renderHabits();
   updateProgress();
-  showToast('Day locked! Great work 🔒');
+  if (!silent) showToast('Day locked! Great work 🔒');
 
   if (pct >= 100) celebrate('day');
   else if (pct >= 70) celebrate('good');
@@ -1581,10 +1939,9 @@ function checkDayComplete() {
   const state = getState();
   const habits = getHabits();
   const today = todayKey();
-  const xp = computeXP(state.checked, today, habits);
-  const maxXP = getMaxXP(today, habits);
-  const pct = maxXP > 0 ? Math.round(xp / maxXP * 100) : 0;
-  if (pct >= 100 && !state._celebToday) {
+  // Celebrate when all NORMAL habits are done (normal = 100%)
+  const normal100 = isNormal100(state.checked, today, habits);
+  if (normal100 && !state._celebToday) {
     state._celebToday = true;
     saveState(state);
     celebrate('day');
@@ -1683,21 +2040,191 @@ function showToast(msg) {
 // EDIT MODAL
 // ═══════════════════════════════════════════════════════
 
+// All possible groups (fixed order)
+const ALL_GROUPS = ['Spirit','Body','Mind','Work','Recovery','Hydration','Wins'];
+
 function openEditModal() {
   const habits = getHabits();
   const list = document.getElementById('edit-habit-list');
   list.innerHTML = '';
+
+  // Group habits
+  const grouped = {};
+  ALL_GROUPS.forEach(g => { grouped[g] = []; });
   habits.forEach(h => {
-    const row = document.createElement('div');
-    row.className = 'edit-habit-row';
-    row.innerHTML = `
-      <input class="edit-habit-name" value="${h.name}" data-id="${h.id}" placeholder="Habit name">
-      <input class="edit-habit-xp" type="number" value="${h.xp}" data-id="${h.id}" min="1" max="100" title="XP">
-      ${h.weekdayOnly !== undefined ? `<div class="edit-weekday-toggle${h.weekdayOnly?' active':''}" data-id="${h.id}" onclick="toggleWeekdayFlag(this)">${h.weekdayOnly?'WD':'ALL'}</div>` : ''}
-    `;
-    list.appendChild(row);
+    if (!grouped[h.group]) grouped[h.group] = [];
+    grouped[h.group].push({...h});
   });
+
+  ALL_GROUPS.forEach(groupName => {
+    const groupHabits = grouped[groupName] || [];
+    const isBonus = groupName === 'Wins';
+
+    // Group header
+    const header = document.createElement('div');
+    header.style.cssText = 'margin:14px 0 6px;display:flex;align-items:center;justify-content:space-between;';
+    header.innerHTML = `
+      <span style="font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:${isBonus?'var(--accent-gold)':'var(--text-muted)'};">${groupName}${isBonus?' (Bonus)':''}</span>
+      <button onclick="addHabitRow('${groupName}','${isBonus}')" style="background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);border-radius:6px;color:var(--accent-cyan);font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1px;padding:3px 10px;cursor:pointer;">+ Add</button>
+    `;
+    list.appendChild(header);
+
+    // Habit rows for this group
+    const groupContainer = document.createElement('div');
+    groupContainer.dataset.group = groupName;
+    groupContainer.dataset.bonus = isBonus ? 'true' : 'false';
+    groupContainer.className = 'edit-group-container';
+
+    groupHabits.forEach(h => {
+      groupContainer.appendChild(buildEditRow(h, groupName, isBonus));
+    });
+    list.appendChild(groupContainer);
+  });
+
+  // ── Weekend Bonus Distribution section ──────────────
+  const cfg = getWeekendCfg();
+  const wkDiv = document.createElement('div');
+  wkDiv.id = 'wkend-dist-section';
+  wkDiv.innerHTML = `
+    <div style="margin:20px 0 8px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.06);">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--accent-gold);margin-bottom:4px;">Weekend Bonus Distribution</div>
+      <div style="font-family:'Rajdhani',sans-serif;font-size:11px;color:var(--text-muted);letter-spacing:0.5px;line-height:1.5;margin-bottom:12px;">
+        On weekends, XP from <strong style="color:var(--text-secondary)">Source habits</strong> (weekday-only) is pooled and split equally among <strong style="color:var(--text-secondary)">Receiver habits</strong>.<br>
+        The pool size auto-updates whenever you change Source habit XP weights.
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <div style="font-family:'Rajdhani',sans-serif;font-size:10px;letter-spacing:1.5px;color:var(--accent-orange);text-transform:uppercase;margin-bottom:6px;">📤 Sources (weekday-only)</div>
+          <div id="wk-sources" style="display:flex;flex-direction:column;gap:5px;"></div>
+        </div>
+        <div>
+          <div style="font-family:'Rajdhani',sans-serif;font-size:10px;letter-spacing:1.5px;color:var(--accent-cyan);text-transform:uppercase;margin-bottom:6px;">📥 Receivers</div>
+          <div id="wk-receivers" style="display:flex;flex-direction:column;gap:5px;"></div>
+        </div>
+      </div>
+
+      <div id="wk-preview" style="margin-top:10px;padding:8px 12px;background:rgba(201,162,39,0.06);border:1px solid rgba(201,162,39,0.15);border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:12px;color:var(--accent-gold);letter-spacing:0.5px;"></div>
+    </div>
+  `;
+  list.appendChild(wkDiv);
+
+  // Populate source and receiver checkboxes
+  renderWeekendDistUI(habits, cfg);
+
   document.getElementById('edit-modal').classList.add('active');
+}
+
+function renderWeekendDistUI(habits, cfg) {
+  const sourcesEl   = document.getElementById('wk-sources');
+  const receiversEl = document.getElementById('wk-receivers');
+  if (!sourcesEl || !receiversEl) return;
+
+  sourcesEl.innerHTML = '';
+  receiversEl.innerHTML = '';
+
+  // Sources: only weekday-only, non-bonus habits
+  const weekdayHabits = habits.filter(h => h.weekdayOnly && !h.bonus);
+  // Receivers: all non-bonus, non-weekdayOnly habits
+  const receivableHabits = habits.filter(h => !h.bonus && !h.weekdayOnly);
+
+  function makeCheckbox(habit, checkedIds, listEl) {
+    const label = document.createElement('label');
+    label.style.cssText = 'display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;color:var(--text-secondary);';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.value = habit.id;
+    cb.checked = checkedIds.includes(habit.id);
+    cb.style.cssText = 'width:14px;height:14px;accent-color:var(--accent-cyan);cursor:pointer;flex-shrink:0;';
+    cb.addEventListener('change', refreshWeekendPreview);
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(habit.name));
+    listEl.appendChild(label);
+  }
+
+  weekdayHabits.forEach(h  => makeCheckbox(h, cfg.sourceIds,   sourcesEl));
+  receivableHabits.forEach(h => makeCheckbox(h, cfg.receiverIds, receiversEl));
+
+  refreshWeekendPreview();
+}
+
+function getModalHabits() {
+  // Read current habits from the edit rows (so XP changes are reflected live in preview)
+  const rows = [];
+  document.querySelectorAll('.edit-habit-row').forEach(row => {
+    const nameEl = row.querySelector('.edit-habit-name');
+    const xpEl   = row.querySelector('.edit-habit-xp');
+    const wdEl   = row.querySelector('.edit-weekday-toggle');
+    if (!nameEl || !nameEl.value.trim()) return;
+    rows.push({
+      id: row.dataset.id,
+      name: nameEl.value.trim(),
+      xp: parseFloat(xpEl.value) || 0,
+      weekdayOnly: wdEl ? wdEl.classList.contains('active') : false,
+      bonus: row.dataset.bonus === 'true',
+    });
+  });
+  return rows;
+}
+
+function refreshWeekendPreview() {
+  const previewEl = document.getElementById('wk-preview');
+  if (!previewEl) return;
+
+  const srcIds = Array.from(document.querySelectorAll('#wk-sources input:checked')).map(c => c.value);
+  const rcvIds = Array.from(document.querySelectorAll('#wk-receivers input:checked')).map(c => c.value);
+
+  const modalHabits = getModalHabits();
+  const totalPool = modalHabits
+    .filter(h => srcIds.includes(h.id))
+    .reduce((s, h) => s + h.xp, 0);
+
+  const perReceiver = rcvIds.length > 0 ? Math.round((totalPool / rcvIds.length) * 10000) / 10000 : 0;
+
+  if (srcIds.length === 0) {
+    previewEl.textContent = 'No source habits selected — no weekend redistribution.';
+    return;
+  }
+  if (rcvIds.length === 0) {
+    previewEl.textContent = `Pool: ${fmtXP(totalPool)} XP — no receivers selected yet.`;
+    return;
+  }
+  previewEl.innerHTML = `Weekend pool: <strong>${fmtXP(totalPool)} XP</strong> ÷ ${rcvIds.length} receivers = <strong>+${fmtXP(perReceiver)} XP</strong> each on weekends.`;
+}
+
+function buildEditRow(h, groupName, isBonus) {
+  const row = document.createElement('div');
+  row.className = 'edit-habit-row';
+  row.dataset.id = h.id;
+  row.dataset.group = groupName;
+  row.dataset.bonus = isBonus ? 'true' : 'false';
+  if (h.waterTier) row.dataset.waterTier = h.waterTier;
+
+  const wdActive = h.weekdayOnly ? ' active' : '';
+  row.innerHTML = `
+    <input class="edit-habit-name" value="${h.name}" placeholder="Habit name" style="flex:1">
+    <input class="edit-habit-xp" type="number" value="${h.xp}" min="0.01" max="100" step="0.01" title="XP" style="width:64px" oninput="refreshWeekendPreview()">
+    <div class="edit-weekday-toggle${wdActive}" onclick="toggleWeekdayFlag(this)">${h.weekdayOnly?'WD':'ALL'}</div>
+    <button onclick="deleteHabitRow(this)" title="Delete" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:6px;color:#ef4444;font-size:13px;width:28px;height:28px;cursor:pointer;flex-shrink:0;">✕</button>
+  `;
+  return row;
+}
+
+function addHabitRow(groupName, isBonusStr) {
+  const isBonus = isBonusStr === 'true';
+  const container = document.querySelector(`.edit-group-container[data-group="${groupName}"]`);
+  if (!container) return;
+  const newId = 'h_' + Date.now();
+  const tempHabit = { id: newId, name: '', xp: isBonus ? 1.25 : 5, weekdayOnly: false };
+  container.appendChild(buildEditRow(tempHabit, groupName, isBonus));
+  // Focus the new name input
+  const inputs = container.querySelectorAll('.edit-habit-name');
+  inputs[inputs.length - 1].focus();
+}
+
+function deleteHabitRow(btn) {
+  const row = btn.closest('.edit-habit-row');
+  if (row) row.remove();
 }
 
 function toggleWeekdayFlag(el) {
@@ -1710,21 +2237,38 @@ function closeEditModal() {
 }
 
 function saveHabits() {
-  const habits = getHabits();
+  const newHabits = [];
   document.querySelectorAll('.edit-habit-row').forEach(row => {
     const nameEl = row.querySelector('.edit-habit-name');
-    const xpEl = row.querySelector('.edit-habit-xp');
-    const wdEl = row.querySelector('.edit-weekday-toggle');
+    const xpEl   = row.querySelector('.edit-habit-xp');
+    const wdEl   = row.querySelector('.edit-weekday-toggle');
     if (!nameEl) return;
-    const id = nameEl.dataset.id;
-    const habit = habits.find(h => h.id === id);
-    if (habit) {
-      habit.name = nameEl.value.trim() || habit.name;
-      habit.xp = Math.max(1, parseInt(xpEl.value) || habit.xp);
-      if (wdEl) habit.weekdayOnly = wdEl.classList.contains('active');
-    }
+    const name = nameEl.value.trim();
+    if (!name) return; // skip empty rows
+    const groupName = row.dataset.group || 'Spirit';
+    const isBonus = row.dataset.bonus === 'true';
+    const id = row.dataset.id || ('h_' + Math.random().toString(36).slice(2));
+    const xp = Math.max(0.01, parseFloat(xpEl.value) || 5);
+    const weekdayOnly = wdEl ? wdEl.classList.contains('active') : false;
+
+    const habit = { id, name, xp, group: groupName, weekdayOnly };
+    if (isBonus) habit.bonus = true;
+    // Preserve waterTier if it exists
+    if (row.dataset.waterTier) habit.waterTier = parseInt(row.dataset.waterTier);
+    newHabits.push(habit);
   });
-  saveHabitsConfig(habits);
+
+  if (newHabits.length === 0) { showToast('No habits to save'); return; }
+  saveHabitsConfig(newHabits);
+
+  // Save weekend distribution config
+  const srcIds = Array.from(document.querySelectorAll('#wk-sources input:checked')).map(c => c.value);
+  const rcvIds = Array.from(document.querySelectorAll('#wk-receivers input:checked')).map(c => c.value);
+  // Only save if the section was rendered (it might not exist if modal hasn't been opened)
+  if (document.getElementById('wk-sources')) {
+    saveWeekendCfg({ sourceIds: srcIds, receiverIds: rcvIds });
+  }
+
   closeEditModal();
   renderHabits();
   updateProgress();
@@ -1773,15 +2317,26 @@ function showSleepSummary(date, wake, bed) {
 // PATTERN INTELLIGENCE
 // ═══════════════════════════════════════════════════════
 
+function timeStrToMins(t) {
+  if (!t) return null;
+  const [h, m] = t.split(':').map(Number);
+  return h * 60 + m;
+}
+
 function generateInsights() {
   const history = getHistory();
   const habits = getHabits();
   const keys = Object.keys(history).sort().slice(-30);
-  if (keys.length < 3) return;
+
+  const list = document.getElementById('suggestion-list');
+  if (keys.length < 3) {
+    list.innerHTML = `<div class="suggestion-item"><div class="suggestion-icon">💡</div><div class="suggestion-text">Complete at least 3 days to unlock personalized insights.</div></div>`;
+    return;
+  }
 
   const suggestions = [];
 
-  // Completion rate per habit
+  // ── 1. Completion rate per habit ──────────────────────
   const habitRates = {};
   habits.forEach(h => { habitRates[h.id] = { done: 0, total: 0, name: h.name }; });
   keys.forEach(k => {
@@ -1794,49 +2349,135 @@ function generateInsights() {
     });
   });
 
-  // Worst habits
-  const worst = habits
+  const ratedHabits = habits
     .filter(h => habitRates[h.id].total >= 3)
-    .map(h => ({ ...h, rate: habitRates[h.id].total > 0 ? habitRates[h.id].done / habitRates[h.id].total : 0 }))
-    .sort((a,b) => a.rate - b.rate)
-    .slice(0,2);
+    .map(h => ({ ...h, rate: habitRates[h.id].done / habitRates[h.id].total }));
 
+  // Worst 2
+  const worst = [...ratedHabits].sort((a,b) => a.rate - b.rate).slice(0, 2);
   worst.forEach(h => {
-    suggestions.push({ icon:'⚠️', text:`"${h.name}" is your weakest habit — only ${Math.round(h.rate*100)}% completion rate in the last ${keys.length} days. Try habit stacking it with a stronger habit.` });
+    suggestions.push({ icon:'⚠️', text:`"${h.name}" — only ${Math.round(h.rate*100)}% completion over the last ${keys.length} days. Try anchoring it to a habit you already do reliably.` });
   });
 
-  // Best habits
-  const best = habits
-    .filter(h => habitRates[h.id].total >= 3)
-    .map(h => ({ ...h, rate: habitRates[h.id].total > 0 ? habitRates[h.id].done / habitRates[h.id].total : 0 }))
-    .sort((a,b) => b.rate - a.rate)
-    .slice(0,1);
-
-  if (best.length) suggestions.push({ icon:'🔥', text:`"${best[0].name}" is your strongest habit at ${Math.round(best[0].rate*100)}%! Use this anchor to build momentum.` });
-
-  // Weekly score trend
-  if (keys.length >= 14) {
-    const recent7 = keys.slice(-7).reduce((s,k) => s + (history[k].pct||0), 0) / 7;
-    const prev7 = keys.slice(-14,-7).reduce((s,k) => s + (history[k].pct||0), 0) / 7;
-    if (recent7 > prev7 + 5) suggestions.push({ icon:'📈', text:`Your average score improved by ${Math.round(recent7-prev7)}pts this week vs last week. You're trending up! 🚀` });
-    else if (recent7 < prev7 - 5) suggestions.push({ icon:'📉', text:`Your score dropped ${Math.round(prev7-recent7)}pts vs last week. Refocus on your core habits.` });
+  // Best
+  const best = [...ratedHabits].sort((a,b) => b.rate - a.rate).slice(0, 1);
+  if (best.length) {
+    suggestions.push({ icon:'🔥', text:`"${best[0].name}" is your strongest habit at ${Math.round(best[0].rate*100)}% — use it as your daily momentum anchor.` });
   }
 
-  // Sleep insight
+  // ── 2. Weekly score trend ─────────────────────────────
+  if (keys.length >= 14) {
+    const recent7 = keys.slice(-7).reduce((s,k) => s + (history[k].pct||0), 0) / 7;
+    const prev7   = keys.slice(-14,-7).reduce((s,k) => s + (history[k].pct||0), 0) / 7;
+    if (recent7 > prev7 + 5)      suggestions.push({ icon:'📈', text:`Your average score is up ${Math.round(recent7-prev7)}pts vs last week. You're building real momentum! 🚀` });
+    else if (recent7 < prev7 - 5) suggestions.push({ icon:'📉', text:`Your average score dropped ${Math.round(prev7-recent7)}pts vs last week. Recommit to your top 3 habits tomorrow.` });
+  }
+
+  // ── 3. Tick-time patterns ─────────────────────────────
+  // Collect tick times per habit across history
+  const habitTimeSamples = {}; // habitId → array of minutes-since-midnight
+  habits.forEach(h => { habitTimeSamples[h.id] = []; });
+
+  keys.forEach(k => {
+    const d = history[k];
+    if (!d || !d.tickTimes) return;
+    Object.entries(d.tickTimes).forEach(([hid, t]) => {
+      const mins = timeStrToMins(t);
+      if (mins !== null) habitTimeSamples[hid].push(mins);
+    });
+  });
+
+  // Also include today's live tick times
+  const state = getState();
+  if (state.tickTimes) {
+    Object.entries(state.tickTimes).forEach(([hid, t]) => {
+      const mins = timeStrToMins(t);
+      if (mins !== null) {
+        if (!habitTimeSamples[hid]) habitTimeSamples[hid] = [];
+        habitTimeSamples[hid].push(mins);
+      }
+    });
+  }
+
+  // Find habits with consistent tick times (low variance → routine)
+  const consistentHabits = [];
+  const lateHabits = []; // completed after 10pm
+  const earlyHabits = []; // completed before 8am
+
+  habits.forEach(h => {
+    const samples = habitTimeSamples[h.id];
+    if (samples.length < 3) return;
+    const avg = samples.reduce((a,b) => a+b, 0) / samples.length;
+    const variance = samples.reduce((s, v) => s + Math.pow(v - avg, 2), 0) / samples.length;
+    const stdDev = Math.sqrt(variance);
+    const avgH = Math.floor(avg / 60);
+    const avgM = String(Math.round(avg % 60)).padStart(2,'0');
+
+    if (stdDev < 45) { // within ~45 min window consistently
+      consistentHabits.push({ name: h.name, avgTime: `${avgH}:${avgM}`, stdDev: Math.round(stdDev) });
+    }
+    if (avg >= 22 * 60) {
+      lateHabits.push({ name: h.name, avgTime: `${avgH}:${avgM}` });
+    }
+    if (avg < 8 * 60) {
+      earlyHabits.push({ name: h.name, avgTime: `${avgH}:${avgM}` });
+    }
+  });
+
+  if (consistentHabits.length > 0) {
+    const eg = consistentHabits[0];
+    suggestions.push({ icon:'⏰', text:`"${eg.name}" has a consistent tick time around ${eg.avgTime} (±${eg.stdDev}min). Your routine is locking in — this is how habits become automatic.` });
+  }
+
+  if (lateHabits.length > 0) {
+    suggestions.push({ icon:'🌙', text:`"${lateHabits.map(h=>h.name).join(', ')}" are typically completed late (after 10pm). Consider moving these earlier in your evening for better recovery.` });
+  }
+
+  if (earlyHabits.length > 0) {
+    suggestions.push({ icon:'🌅', text:`"${earlyHabits.map(h=>h.name).join(', ')}" are knocked out before 8am — strong morning habits compound over time.` });
+  }
+
+  // ── 4. Habits with no time data (encourage logging) ──
+  const untimed = habits.filter(h => (habitTimeSamples[h.id]||[]).length === 0 && habitRates[h.id] && habitRates[h.id].done > 0);
+  if (untimed.length >= 3) {
+    suggestions.push({ icon:'🕐', text:`${untimed.length} habits have no tick-time data. Tap the time badge on a completed habit to log when you did it — this unlocks deeper timing insights.` });
+  }
+
+  // ── 5. Sleep insight ──────────────────────────────────
   const sleep = getSleepData();
   const sleepKeys = Object.keys(sleep).filter(k => sleep[k].bed);
   const lateSleeps = sleepKeys.filter(k => {
-    const bed = sleep[k].bed;
-    const [h] = bed.split(':').map(Number);
-    return h >= 0 && h < 6;
+    const [h2] = sleep[k].bed.split(':').map(Number);
+    return h2 >= 0 && h2 < 6;
   });
   if (sleepKeys.length >= 3 && lateSleeps.length / sleepKeys.length > 0.4) {
-    suggestions.push({ icon:'😴', text:`You're sleeping after midnight ${Math.round(lateSleeps.length/sleepKeys.length*100)}% of tracked nights. Consistent early sleep dramatically boosts next-day performance.` });
+    suggestions.push({ icon:'😴', text:`You're sleeping past midnight ${Math.round(lateSleeps.length/sleepKeys.length*100)}% of logged nights. Consistent early sleep directly boosts next-day habit completion.` });
   }
 
-  if (suggestions.length === 0) suggestions.push({ icon:'✅', text:'Excellent consistency! Keep maintaining all your habits to build an unbreakable streak.' });
+  // ── 6. Correlate sleep wake time with daily score ────
+  if (sleepKeys.length >= 5) {
+    const earlyWakeScores = [], lateWakeScores = [];
+    sleepKeys.forEach(k => {
+      const wake = sleep[k].wake;
+      if (!wake || !history[k]) return;
+      const [wh] = wake.split(':').map(Number);
+      const pct = history[k].pct || 0;
+      if (wh <= 7) earlyWakeScores.push(pct);
+      else lateWakeScores.push(pct);
+    });
+    if (earlyWakeScores.length >= 2 && lateWakeScores.length >= 2) {
+      const earlyAvg = earlyWakeScores.reduce((a,b)=>a+b,0)/earlyWakeScores.length;
+      const lateAvg  = lateWakeScores.reduce((a,b)=>a+b,0)/lateWakeScores.length;
+      if (earlyAvg > lateAvg + 10) {
+        suggestions.push({ icon:'☀️', text:`On days you wake by 7am your habit score averages ${Math.round(earlyAvg)}% vs ${Math.round(lateAvg)}% on later mornings. Early rising is your performance multiplier.` });
+      }
+    }
+  }
 
-  const list = document.getElementById('suggestion-list');
+  if (suggestions.length === 0) {
+    suggestions.push({ icon:'✅', text:'Excellent consistency! Keep maintaining all your habits to build an unbreakable streak.' });
+  }
+
   list.innerHTML = suggestions.map(s => `
     <div class="suggestion-item">
       <div class="suggestion-icon">${s.icon}</div>
@@ -1929,7 +2570,7 @@ function showCalTooltip(e, key, data, pin) {
 
   tt.innerHTML = `
     <div class="tt-date">${dayNames[d.getDay()]}, ${monthNames[d.getMonth()]} ${d.getDate()}</div>
-    <div class="tt-score">${data.pct}% — ${data.xp} XP</div>
+    <div class="tt-score">${data.pct}%  ${data.bonusXP > 0 ? `<span style="font-size:12px;color:var(--accent-gold)">(+${fmtXP(data.bonusXP)}⭐)</span>` : ''}</div>
     <div class="tt-habits">${checkedNames.length > 0 ? checkedNames.join(' · ') : 'No habits completed'}</div>
   `;
 
@@ -1999,6 +2640,7 @@ function resetToday() {
     () => {
       const state = getState();
       state.checked = {};
+      state.tickTimes = {};
       state.locked = false;
       state._celebToday = false;
       saveState(state);

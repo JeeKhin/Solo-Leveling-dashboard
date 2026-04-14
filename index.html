@@ -438,10 +438,10 @@
   .end-day-btn {
     width: 100%;
     padding: 14px;
-    background: linear-gradient(135deg, rgba(255,107,43,0.15), rgba(255,107,43,0.05));
-    border: 1px solid rgba(255,107,43,0.3);
+    background: linear-gradient(135deg, rgba(0,212,255,0.1), rgba(0,212,255,0.04));
+    border: 1px solid rgba(0,212,255,0.25);
     border-radius: 12px;
-    color: var(--accent-orange);
+    color: var(--accent-cyan);
     font-family: 'Rajdhani', sans-serif;
     font-size: 15px;
     font-weight: 600;
@@ -450,8 +450,8 @@
     cursor: pointer;
     transition: all 0.2s;
   }
-  .end-day-btn:hover { background: linear-gradient(135deg, rgba(255,107,43,0.25), rgba(255,107,43,0.1)); box-shadow: 0 0 20px rgba(255,107,43,0.2); }
-  .end-day-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .end-day-btn:hover { background: linear-gradient(135deg, rgba(0,212,255,0.18), rgba(0,212,255,0.08)); box-shadow: 0 0 20px rgba(0,212,255,0.15); }
+
 
   /* Sleep tracker section */
   .sleep-tracker-section {
@@ -996,18 +996,18 @@
   /* ─── DAY LOCKED BANNER ─── */
   .locked-banner {
     display: none;
-    background: linear-gradient(135deg, rgba(255,107,43,0.1), rgba(255,107,43,0.05));
-    border: 1px solid rgba(255,107,43,0.2);
+    background: rgba(0,212,255,0.05);
+    border: 1px solid rgba(0,212,255,0.12);
     border-radius: 10px;
-    padding: 10px 16px;
+    padding: 8px 16px;
     margin: 0 16px 12px;
     max-width: 700px;
     margin-left: auto;
     margin-right: auto;
     font-family: 'Rajdhani', sans-serif;
-    font-size: 13px;
+    font-size: 12px;
     letter-spacing: 1px;
-    color: var(--accent-orange);
+    color: var(--text-secondary);
     text-align: center;
   }
   .locked-banner.active { display: block; }
@@ -1105,7 +1105,7 @@
   <div style="height:14px"></div>
 
   <div class="locked-banner" id="locked-banner">
-    🔒 Day Locked — Scores are saved. See you tomorrow!
+    💾 Score saved.
   </div>
 
   <div class="habits-container" id="habits-container"></div>
@@ -1145,7 +1145,7 @@
   </div>
 
   <div class="end-day-section">
-    <button class="end-day-btn" id="end-day-btn" onclick="endDay()">⏹ End Day & Lock Scores</button>
+    <button class="end-day-btn" id="end-day-btn" onclick="endDay()">💾 Save Day's Score</button>
   </div>
 </div>
 
@@ -1408,7 +1408,7 @@ function checkAutoReset(now) {
       }
       state.checked = {};
       state.tickTimes = {};
-      state.locked = false;
+      state.lastSaved = null;
       state.lastDate = key;
       saveState(state);
       renderHabits();
@@ -1421,9 +1421,13 @@ function checkAutoEndDay(now) {
   // Auto-save at 23:59 every day so scores are never lost
   if (now.getHours() === 23 && now.getMinutes() === 59) {
     const state = getState();
-    if (!state.locked && state.lastDate === todayKey()) {
-      endDay();
-      showToast('Auto-saved at 11:59pm 🔒');
+    // Only auto-save once per minute (guard with a flag on the state)
+    const autoSaveKey = 'autoSave_' + todayKey();
+    if (state.lastDate === todayKey() && !state[autoSaveKey]) {
+      state[autoSaveKey] = true;
+      saveState(state);
+      endDay(true); // silent — no toast from endDay
+      showToast('Scores auto-saved at 11:59pm 💾');
     }
   }
 }
@@ -1534,7 +1538,7 @@ function renderHabits() {
   const state = getState();
   const checked = state.checked || {};
   const tickTimes = state.tickTimes || {};
-  const locked = !!state.locked;
+  const locked = false; // locking removed — checkboxes always editable
   const today = todayKey();
   const weekend = isWeekend(today);
   const normal100 = isNormal100(checked, today, habits); // whether bonus XP is unlocked
@@ -1578,7 +1582,7 @@ function renderHabits() {
 
     const body = groupEl.querySelector('.habit-group-body');
     groupHabits.forEach(h => {
-      const isDisabled = (h.weekdayOnly && weekend) || (h.bonus && !normal100 && !locked);
+      const isDisabled = (h.weekdayOnly && weekend); // bonus habits dim but remain clickable; locking removed
       const isChecked = !!checked[h.id];
       const effectiveXP = getEffectiveXP(h, today, habits);
       const hasWeekendBonus = weekend && getWeekendCfg().receiverIds.includes(h.id);
@@ -1619,20 +1623,21 @@ function renderHabits() {
     groupIdx++;
   });
 
-  // Lock state
+  // Show last-saved info bar (non-blocking)
   const bannerEl = document.getElementById('locked-banner');
-  bannerEl.classList.toggle('active', locked);
-  if (locked) {
-    const history = getHistory();
-    const todayData = history[today];
-    const autoSaved = todayData && todayData.autoSaved;
-    const bonusXP = todayData && todayData.bonusXP ? todayData.bonusXP : 0;
-    const bonusTxt = bonusXP > 0 ? ` + ${fmtXP(bonusXP)}⭐ bonus` : '';
-    bannerEl.textContent = autoSaved
-      ? `⏱ Auto-saved at 11:59pm${bonusTxt} — scores locked for the day.`
-      : `🔒 Day Locked${bonusTxt} — Scores are saved. See you tomorrow!`;
+  const history = getHistory();
+  const todayData = history[today];
+  if (todayData && state.lastSaved) {
+    const savedTime = new Date(state.lastSaved);
+    const hh = String(savedTime.getHours()).padStart(2,'0');
+    const mm = String(savedTime.getMinutes()).padStart(2,'0');
+    const bonusXP = todayData.bonusXP || 0;
+    const bonusTxt = bonusXP > 0 ? ` + ${fmtXP(bonusXP)}⭐` : '';
+    bannerEl.textContent = `💾 Last saved ${hh}:${mm} — ${fmtXP(todayData.normalXP||0)}${bonusTxt} XP (${todayData.pct}%)`;
+    bannerEl.classList.add('active');
+  } else {
+    bannerEl.classList.remove('active');
   }
-  document.getElementById('end-day-btn').disabled = locked;
 }
 
 function toggleGroup(header) {
@@ -1903,7 +1908,6 @@ function updateSettings() {
 
 function endDay(silent) {
   const state = getState();
-  if (state.locked) return;
   const habits = getHabits();
   const today = todayKey();
   const normalXP  = computeNormalXP(state.checked, today, habits);
@@ -1921,12 +1925,14 @@ function endDay(silent) {
   };
   saveHistory(history);
 
-  state.locked = true;
+  // No locking — just save the current state timestamp so we know the last save time
+  state.lastSaved = new Date().toISOString();
   saveState(state);
 
-  renderHabits();
-  updateProgress();
-  if (!silent) showToast('Day locked! Great work 🔒');
+  if (!silent) {
+    const bonusTxt = bonusXP > 0 ? ` + ${fmtXP(bonusXP)}⭐` : '';
+    showToast(`Score saved: ${fmtXP(normalXP)}${bonusTxt} XP (${pct}%) ✓`);
+  }
 
   if (pct >= 100) celebrate('day');
   else if (pct >= 70) celebrate('good');
@@ -2636,12 +2642,12 @@ function renderMonthlyBars(refYear) {
 function resetToday() {
   showConfirm(
     'Reset Today\'s Checklist?',
-    'All checkboxes will be unchecked and the day will be unlocked. Your history is kept.',
+    'All checkboxes will be unchecked and the saved score will be cleared. Your full history is kept.',
     () => {
       const state = getState();
       state.checked = {};
       state.tickTimes = {};
-      state.locked = false;
+      state.lastSaved = null;
       state._celebToday = false;
       saveState(state);
       renderHabits();
@@ -2713,10 +2719,11 @@ function init() {
   // Ensure today state exists
   const state = getState();
   if (!state.lastDate) { state.lastDate = todayKey(); saveState(state); }
-  if (state.lastDate !== todayKey() && !state.locked) {
-    // New day but not reset yet — reset
+  if (state.lastDate !== todayKey()) {
+    // New day — reset checklist
     state.checked = {};
-    state.locked = false;
+    state.tickTimes = {};
+    state.lastSaved = null;
     state._celebToday = false;
     state.lastDate = todayKey();
     saveState(state);

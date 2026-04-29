@@ -364,6 +364,11 @@
     border-color: rgba(0,212,255,0.3);
     color: var(--accent-cyan);
   }
+  .tick-time-badge.late-tick {
+    border-color: rgba(239,68,68,0.4);
+    color: #ef4444;
+    background: rgba(239,68,68,0.08);
+  }
   .tick-time-badge.no-time {
     color: var(--text-muted);
     border-style: dashed;
@@ -428,6 +433,66 @@
   .tpa-clear:hover { background:rgba(239,68,68,0.16); }
   .tpa-cancel { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.08); color:var(--text-secondary); }
   .tpa-cancel:hover { background:rgba(255,255,255,0.08); }
+
+  /* ─── ADJUST PREVIOUS DAY ─── */
+  .adjust-btn {
+    width: 100%;
+    padding: 11px;
+    background: rgba(124,58,237,0.1);
+    border: 1px solid rgba(124,58,237,0.25);
+    border-radius: 12px;
+    color: var(--accent-purple);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+  .adjust-btn:hover { background: rgba(124,58,237,0.18); box-shadow: 0 0 16px rgba(124,58,237,0.2); }
+
+  .adj-habit-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .adj-habit-row:last-child { border-bottom: none; }
+  .adj-habit-name { flex: 1; font-size: 13px; color: var(--text-secondary); }
+  .adj-tick-cb { width: 18px; height: 18px; accent-color: var(--accent-cyan); cursor: pointer; flex-shrink: 0; }
+  .adj-time-input {
+    width: 88px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(0,212,255,0.15);
+    border-radius: 7px;
+    color: var(--text-primary);
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    padding: 5px 7px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .adj-time-input:focus { border-color: var(--accent-cyan); }
+  .adj-xp-preview {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    color: var(--accent-cyan);
+    white-space: nowrap;
+    min-width: 48px;
+    text-align: right;
+  }
+  .adj-late-badge {
+    font-size: 9px;
+    color: #ef4444;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.25);
+    border-radius: 5px;
+    padding: 1px 5px;
+    white-space: nowrap;
+  }
 
   /* ─── END DAY BUTTON ─── */
   .end-day-btn-top {
@@ -1157,6 +1222,7 @@
 
   <div class="end-day-section">
     <button class="end-day-btn" id="end-day-btn" onclick="endDay()">💾 Save Day's Score</button>
+    <button class="adjust-btn" id="adjust-prev-btn" onclick="openAdjustModal()">✏️ Adjust Previous Day's Score</button>
   </div>
 </div>
 
@@ -1220,6 +1286,10 @@
   <div class="settings-section">
     <div class="settings-section-title">Data</div>
     <div class="settings-row">
+      <span class="settings-label">Adjust a previous day's score</span>
+      <button class="settings-btn" onclick="openAdjustModal()">Adjust →</button>
+    </div>
+    <div class="settings-row">
       <span class="settings-label">Reset today's checklist</span>
       <button class="settings-btn" onclick="resetToday()">Reset</button>
     </div>
@@ -1272,6 +1342,35 @@
   </div>
 </div>
 
+<!-- ═══════════════════════════════ ADJUST PREVIOUS DAY MODAL ══════════════════ -->
+<div class="modal-overlay" id="adjust-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" style="margin-bottom:0">✏️ Adjust Previous Day</div>
+      <div style="font-family:'Rajdhani',sans-serif;font-size:11px;color:var(--text-muted);letter-spacing:1px;margin-top:4px;">
+        Re-tick habits and set tick times for any past day. Late penalties apply automatically.
+      </div>
+      <button class="modal-close" onclick="closeAdjustModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="padding:12px 0 4px;">
+        <label style="font-family:'Rajdhani',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);">Date to adjust</label>
+        <input type="date" id="adj-date-picker"
+          style="display:block;margin-top:6px;width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(0,212,255,0.2);border-radius:8px;color:var(--text-primary);font-family:'Orbitron',monospace;font-size:13px;padding:8px 10px;outline:none;"
+          onchange="renderAdjustHabits()">
+      </div>
+      <div id="adj-habit-list" style="margin-top:8px;"></div>
+      <div id="adj-score-preview" style="margin-top:12px;padding:10px 14px;background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.12);border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:13px;color:var(--text-secondary);letter-spacing:0.5px;"></div>
+    </div>
+    <div class="modal-footer">
+      <div class="modal-actions" style="margin-top:0">
+        <button class="btn-secondary" onclick="closeAdjustModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveAdjustedDay()">Save Adjusted Score</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════════════════════ CELEBRATION ═══════════════════════════════ -->
 <div class="celebration-overlay" id="celebration-overlay">
   <div class="celebration-message">
@@ -1317,6 +1416,83 @@ const DEFAULT_HABITS = [
 // Shape: { sourceIds: ['work','reachwork'], receiverIds: ['god','shower','breakfast','sleep12'] }
 // The total XP of all sourceIds is summed and split equally among receiverIds on weekends.
 // ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
+// LATE PENALTY CONFIG
+// Each entry: { id, deadline: 'HH:MM', penaltyPerMin, maxPenalty, crossesMidnight }
+//   deadline        — the on-time cutoff (HH:MM, 24h)
+//   penaltyPerMin   — XP lost per minute late (can be decimal)
+//   maxPenalty      — cap: never deduct more than this (usually = full habit XP)
+//   crossesMidnight — true for sleep: deadline is "before midnight", tick after midnight
+//                     counts as late for the PREVIOUS day
+// ══════════════════════════════════════════════════════════════════════
+const DEFAULT_LATE_PENALTIES = [
+  { id: 'reachwork', deadline: '09:00', penaltyPerMin: 0.05, maxPenalty: 5   },
+  { id: 'work',      deadline: '18:00', penaltyPerMin: 0.05, maxPenalty: 5   },
+  { id: 'sleep12',   deadline: '23:59', penaltyPerMin: 0.10, maxPenalty: 10, crossesMidnight: true },
+];
+
+function getLatePenalties() {
+  try {
+    const raw = localStorage.getItem('hd_late_penalties');
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return DEFAULT_LATE_PENALTIES.map(p => ({...p}));
+}
+function saveLatePenalties(arr) {
+  localStorage.setItem('hd_late_penalties', JSON.stringify(arr));
+}
+
+/**
+ * Returns the XP deduction for a habit given its tick time.
+ * tickTime: 'HH:MM' string or null.
+ * Returns a positive number (amount to deduct), or 0 if on time / no time.
+ */
+function computeLateDeduction(habitId, tickTime, dateStr) {
+  if (!tickTime) return 0;
+  const penalties = getLatePenalties();
+  const cfg = penalties.find(p => p.id === habitId);
+  if (!cfg) return 0;
+
+  const [th, tm] = tickTime.split(':').map(Number);
+  const [dh, dm] = cfg.deadline.split(':').map(Number);
+
+  let tickMins     = th * 60 + tm;
+  let deadlineMins = dh * 60 + dm;
+
+  // crossesMidnight: ticks from 00:00–05:59 count as next day's early morning
+  // but for the previous day's sleep record (e.g. ticking at 01:30 = 90 mins past midnight)
+  if (cfg.crossesMidnight) {
+    if (tickMins < 6 * 60) {
+      // After midnight — late by: (24*60 - deadlineMins) + tickMins
+      const minsLate = (24 * 60 - deadlineMins) + tickMins;
+      const deduction = Math.round(Math.min(minsLate * cfg.penaltyPerMin, cfg.maxPenalty) * 100) / 100;
+      return deduction;
+    }
+    // Ticked before midnight cutoff (e.g. 22:00) → on time
+    if (tickMins <= deadlineMins) return 0;
+    const minsLate = tickMins - deadlineMins;
+    return Math.round(Math.min(minsLate * cfg.penaltyPerMin, cfg.maxPenalty) * 100) / 100;
+  }
+
+  if (tickMins <= deadlineMins) return 0;
+  const minsLate = tickMins - deadlineMins;
+  return Math.round(Math.min(minsLate * cfg.penaltyPerMin, cfg.maxPenalty) * 100) / 100;
+}
+
+/**
+ * Total late deduction for a checked set + tick times on a given day.
+ */
+function totalLateDeduction(checked, tickTimes, dateStr) {
+  let total = 0;
+  const penalties = getLatePenalties();
+  penalties.forEach(cfg => {
+    if (checked && checked[cfg.id] && tickTimes && tickTimes[cfg.id]) {
+      total += computeLateDeduction(cfg.id, tickTimes[cfg.id], dateStr);
+    }
+  });
+  return Math.round(total * 100) / 100;
+}
+
 // ── Hybrid level thresholds ──────────────────────────────────────────
 // Level is determined by cumulative ALL-TIME XP (never goes down).
 // Streak acts as a multiplier shown in the level tooltip.
@@ -1510,9 +1686,9 @@ function autoSaveYesterdayIfMissed(yesterdayKey, state) {
     const habits = getHabits();
     const checked = state.checked || {};
     const tickTimes = state.tickTimes || {};
-    const normalXP  = computeNormalXP(checked, yesterdayKey, habits);
+    const normalXP  = computeNormalXP(checked, yesterdayKey, habits, tickTimes);
     const normalMax = getNormalMaxXP(yesterdayKey, habits);
-    const bonusXP   = computeXP(checked, yesterdayKey, habits) - normalXP;
+    const bonusXP   = computeXP(checked, yesterdayKey, habits, tickTimes) - normalXP;
     const pct = normalMax > 0 ? Math.min(100, Math.round(normalXP / normalMax * 100)) : 0;
     history[yesterdayKey] = {
       xp: normalXP + bonusXP, normalXP, bonusXP, maxXP: normalMax, pct,
@@ -1573,7 +1749,7 @@ function isNormal100(checked, dateStr, habits) {
   return normalHabits.every(h => checked && checked[h.id]);
 }
 
-function computeXP(checked, dateStr, habits) {
+function computeXP(checked, dateStr, habits, tickTimes) {
   const normalFull = isNormal100(checked, dateStr, habits);
   let xp = 0;
   habits.forEach(h => {
@@ -1581,16 +1757,18 @@ function computeXP(checked, dateStr, habits) {
     if (h.bonus && !normalFull) return; // bonus XP locked until 100% normal done
     xp += getEffectiveXP(h, dateStr, habits);
   });
-  return Math.round(xp * 100) / 100;
+  const penalty = tickTimes ? totalLateDeduction(checked, tickTimes, dateStr) : 0;
+  return Math.round(Math.max(0, xp - penalty) * 100) / 100;
 }
 
-function computeNormalXP(checked, dateStr, habits) {
-  // XP from non-bonus habits only (for progress bar base)
+function computeNormalXP(checked, dateStr, habits, tickTimes) {
+  // XP from non-bonus habits, minus any late-penalty deductions
   let xp = 0;
   habits.filter(h => !h.bonus).forEach(h => {
     if (checked && checked[h.id]) xp += getEffectiveXP(h, dateStr, habits);
   });
-  return Math.round(xp * 100) / 100;
+  const penalty = tickTimes ? totalLateDeduction(checked, tickTimes, dateStr) : 0;
+  return Math.round(Math.max(0, xp - penalty) * 100) / 100;
 }
 
 function groupHabits(habits) {
@@ -1666,16 +1844,24 @@ function renderHabits() {
       if (bonusDimmed) item.style.opacity = '0.35';
 
       let timeBadgeHtml = '';
+      const lateDeduction = isChecked && tickTime ? computeLateDeduction(h.id, tickTime, today) : 0;
       if (isChecked) {
         if (tickTime) {
-          timeBadgeHtml = `<span class="tick-time-badge" title="Tapped at ${tickTime} — click to edit" onclick="event.stopPropagation();openTimePopover(event,'${h.id}')">${tickTime}</span>`;
+          const lateLabel = lateDeduction > 0
+            ? ` <span style="color:#ef4444;font-size:8px;">-${fmtXP(lateDeduction)}</span>`
+            : '';
+          timeBadgeHtml = `<span class="tick-time-badge${lateDeduction>0?' late-tick':''}" title="${lateDeduction>0?'Late! -'+fmtXP(lateDeduction)+' XP penalty. ':''}Tapped at ${tickTime} — click to edit" onclick="event.stopPropagation();openTimePopover(event,'${h.id}')">${tickTime}${lateLabel}</span>`;
         } else {
           timeBadgeHtml = `<span class="tick-time-badge no-time" title="No time recorded — click to set" onclick="event.stopPropagation();openTimePopover(event,'${h.id}')">set time</span>`;
         }
       }
 
-      const xpColor = h.bonus ? 'color:var(--accent-gold)' : '';
+      const netXP = Math.max(0, effectiveXP - lateDeduction);
+      const xpColor = h.bonus ? 'color:var(--accent-gold)' : (lateDeduction > 0 ? 'color:#ef4444' : '');
       const bonusStar = h.bonus ? '<span style="font-size:9px;color:var(--accent-gold);margin-right:2px;">⭐</span>' : '';
+      const xpLabel = lateDeduction > 0
+        ? `<span style="text-decoration:line-through;opacity:0.4;font-size:10px;">+${fmtXP(effectiveXP)}</span> <span style="color:#ef4444">+${fmtXP(netXP)}</span>`
+        : `+${fmtXP(effectiveXP)}`;
 
       item.innerHTML = `
         <div class="habit-checkbox${isChecked?' checked':''}${h.bonus?' bonus-check':''}" data-id="${h.id}"
@@ -1685,7 +1871,7 @@ function renderHabits() {
         ${h.weekdayOnly ? '<span class="weekday-only-badge">Weekday</span>' : ''}
         ${hasWeekendBonus ? `<span class="weekday-only-badge" style="color:var(--accent-green);border-color:rgba(0,230,118,0.3);background:rgba(0,230,118,0.08)">+${fmtXP(getWeekendBonusPerReceiver(habits))} WE</span>` : ''}
         ${timeBadgeHtml}
-        ${bonusStar}<span class="habit-xp" style="${xpColor}">+${fmtXP(effectiveXP)} XP</span>
+        ${bonusStar}<span class="habit-xp" style="${xpColor}">${xpLabel} XP</span>
       `;
       body.appendChild(item);
     });
@@ -1864,9 +2050,9 @@ function updateProgress() {
   const state = getState();
   const habits = getHabits();
   const today = todayKey();
-  const normalXP   = computeNormalXP(state.checked, today, habits);
+  const normalXP   = computeNormalXP(state.checked, today, habits, state.tickTimes || {});
   const normalMax  = getNormalMaxXP(today, habits);
-  const bonusXP    = computeXP(state.checked, today, habits) - normalXP;
+  const bonusXP    = computeXP(state.checked, today, habits, state.tickTimes || {}) - normalXP;
   const totalXP    = normalXP + bonusXP;
 
   // Progress ring is based on normal habits 0→100%, then bonus pushes beyond
@@ -2003,9 +2189,10 @@ function endDay(silent) {
   const state = getState();
   const habits = getHabits();
   const today = todayKey();
-  const normalXP  = computeNormalXP(state.checked, today, habits);
+  const tickTimes = state.tickTimes || {};
+  const normalXP  = computeNormalXP(state.checked, today, habits, tickTimes);
   const normalMax = getNormalMaxXP(today, habits);
-  const bonusXP   = computeXP(state.checked, today, habits) - normalXP;
+  const bonusXP   = computeXP(state.checked, today, habits, tickTimes) - normalXP;
   const totalXP   = normalXP + bonusXP;
   // pct is based on normal only (100% = all normal habits done)
   const pct = normalMax > 0 ? Math.min(100, Math.round(normalXP / normalMax * 100)) : 0;
@@ -2731,6 +2918,187 @@ function renderMonthlyBars(refYear) {
 // ═══════════════════════════════════════════════════════
 // SETTINGS ACTIONS
 // ═══════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════
+// ADJUST PREVIOUS DAY
+// ═══════════════════════════════════════════════════════
+
+function openAdjustModal() {
+  // Default date: yesterday if it's before 6am, otherwise today-1
+  const now = new Date();
+  const defaultDate = new Date(now);
+  if (now.getHours() < 6) {
+    defaultDate.setDate(defaultDate.getDate() - 1);
+  } else {
+    defaultDate.setDate(defaultDate.getDate() - 1);
+  }
+  const yyyy = defaultDate.getFullYear();
+  const mm   = String(defaultDate.getMonth() + 1).padStart(2, '0');
+  const dd   = String(defaultDate.getDate()).padStart(2, '0');
+
+  document.getElementById('adj-date-picker').value = `${yyyy}-${mm}-${dd}`;
+  // Cap max date at yesterday (can't adjust today via this modal)
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  const yy2 = yesterday.getFullYear();
+  const mm2  = String(yesterday.getMonth() + 1).padStart(2, '0');
+  const dd2  = String(yesterday.getDate()).padStart(2, '0');
+  document.getElementById('adj-date-picker').max = `${yy2}-${mm2}-${dd2}`;
+
+  renderAdjustHabits();
+  document.getElementById('adjust-modal').classList.add('active');
+}
+
+function closeAdjustModal() {
+  document.getElementById('adjust-modal').classList.remove('active');
+}
+
+function renderAdjustHabits() {
+  const dateStr  = document.getElementById('adj-date-picker').value;
+  if (!dateStr) return;
+
+  const habits   = getHabits();
+  const history  = getHistory();
+  const existing = history[dateStr] || {};
+  const checked  = existing.checked  || {};
+  const tickTimes = existing.tickTimes || {};
+  const weekend  = isWeekend(dateStr);
+
+  const listEl = document.getElementById('adj-habit-list');
+  listEl.innerHTML = '';
+
+  const normalHabits = habits.filter(h => !h.bonus && !(h.weekdayOnly && weekend));
+  const bonusHabits  = habits.filter(h =>  h.bonus);
+
+  function buildRow(h) {
+    const row = document.createElement('div');
+    row.className = 'adj-habit-row';
+    row.dataset.id = h.id;
+
+    const isChecked = !!checked[h.id];
+    const timeVal   = tickTimes[h.id] || '';
+    const effXP     = getEffectiveXP(h, dateStr, habits);
+
+    row.innerHTML = `
+      <input type="checkbox" class="adj-tick-cb" ${isChecked ? 'checked' : ''}
+        onchange="refreshAdjPreview()">
+      <span class="adj-habit-name">${h.name}${h.bonus ? ' ⭐' : ''}</span>
+      <input type="time" class="adj-time-input" value="${timeVal}"
+        placeholder="--:--" oninput="refreshAdjPreview()">
+      <span class="adj-late-badge" style="display:none">late</span>
+      <span class="adj-xp-preview">+${fmtXP(effXP)}</span>
+    `;
+    listEl.appendChild(row);
+  }
+
+  // Section header: Normal
+  const nhdr = document.createElement('div');
+  nhdr.style.cssText = 'font-family:"Rajdhani",sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);padding:8px 0 4px;';
+  nhdr.textContent = 'Normal Habits';
+  listEl.appendChild(nhdr);
+  normalHabits.forEach(buildRow);
+
+  // Section header: Bonus
+  const bhdr = document.createElement('div');
+  bhdr.style.cssText = 'font-family:"Rajdhani",sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent-gold);padding:10px 0 4px;';
+  bhdr.textContent = 'Bonus Wins (only count at 100% normal)';
+  listEl.appendChild(bhdr);
+  bonusHabits.forEach(buildRow);
+
+  refreshAdjPreview();
+}
+
+function refreshAdjPreview() {
+  const dateStr  = document.getElementById('adj-date-picker').value;
+  if (!dateStr) return;
+  const habits   = getHabits();
+  const weekend  = isWeekend(dateStr);
+
+  const rows    = document.querySelectorAll('#adj-habit-list .adj-habit-row');
+  const checked = {};
+  const times   = {};
+
+  rows.forEach(row => {
+    const id  = row.dataset.id;
+    const cb  = row.querySelector('.adj-tick-cb');
+    const ti  = row.querySelector('.adj-time-input');
+    const lb  = row.querySelector('.adj-late-badge');
+    const xpEl = row.querySelector('.adj-xp-preview');
+    const h   = habits.find(hh => hh.id === id);
+    if (!h) return;
+
+    if (cb.checked) {
+      checked[id] = true;
+      if (ti.value) times[id] = ti.value;
+    }
+
+    // Late penalty display per row
+    const deduction = cb.checked && ti.value ? computeLateDeduction(id, ti.value, dateStr) : 0;
+    const effXP = getEffectiveXP(h, dateStr, habits);
+    const net   = Math.max(0, effXP - deduction);
+
+    if (deduction > 0) {
+      lb.style.display = 'inline';
+      lb.textContent   = `-${fmtXP(deduction)} XP`;
+      xpEl.textContent = `+${fmtXP(net)}`;
+      xpEl.style.color = '#ef4444';
+    } else {
+      lb.style.display  = 'none';
+      xpEl.textContent  = cb.checked ? `+${fmtXP(effXP)}` : `+${fmtXP(effXP)}`;
+      xpEl.style.color  = h.bonus ? 'var(--accent-gold)' : 'var(--accent-cyan)';
+    }
+  });
+
+  const normalXP  = computeNormalXP(checked, dateStr, habits, times);
+  const normalMax = getNormalMaxXP(dateStr, habits);
+  const bonusXP   = computeXP(checked, dateStr, habits, times) - normalXP;
+  const pct       = normalMax > 0 ? Math.min(100, Math.round(normalXP / normalMax * 100)) : 0;
+
+  const lateTot   = totalLateDeduction(checked, times, dateStr);
+  const previewEl = document.getElementById('adj-score-preview');
+  previewEl.innerHTML = `
+    Score: <strong style="color:var(--accent-cyan)">${fmtXP(normalXP)} XP</strong>
+    ${bonusXP > 0 ? ` + <strong style="color:var(--accent-gold)">${fmtXP(bonusXP)}⭐</strong>` : ''}
+    &nbsp;·&nbsp; <strong style="color:var(--accent-cyan)">${pct}%</strong>
+    ${lateTot > 0 ? `&nbsp;·&nbsp; <span style="color:#ef4444">-${fmtXP(lateTot)} XP late penalty</span>` : ''}
+  `;
+}
+
+function saveAdjustedDay() {
+  const dateStr  = document.getElementById('adj-date-picker').value;
+  if (!dateStr) { showToast('Please pick a date'); return; }
+
+  const habits  = getHabits();
+  const rows    = document.querySelectorAll('#adj-habit-list .adj-habit-row');
+  const checked  = {};
+  const tickTimes = {};
+
+  rows.forEach(row => {
+    const id = row.dataset.id;
+    const cb = row.querySelector('.adj-tick-cb');
+    const ti = row.querySelector('.adj-time-input');
+    if (cb.checked) {
+      checked[id] = true;
+      if (ti.value) tickTimes[id] = ti.value;
+    }
+  });
+
+  const normalXP  = computeNormalXP(checked, dateStr, habits, tickTimes);
+  const normalMax = getNormalMaxXP(dateStr, habits);
+  const bonusXP   = computeXP(checked, dateStr, habits, tickTimes) - normalXP;
+  const pct       = normalMax > 0 ? Math.min(100, Math.round(normalXP / normalMax * 100)) : 0;
+
+  const history = getHistory();
+  history[dateStr] = {
+    xp: normalXP + bonusXP, normalXP, bonusXP, maxXP: normalMax, pct,
+    checked, tickTimes, adjusted: true, adjustedAt: new Date().toISOString()
+  };
+  saveHistory(history);
+  closeAdjustModal();
+  renderHabits();
+  updateProgress();
+  showToast(`Score saved for ${dateStr} ✓`);
+}
 
 function resetToday() {
   showConfirm(

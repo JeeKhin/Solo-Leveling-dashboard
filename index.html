@@ -4,7 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Morning Sprint | War Room</title>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"></noscript>
+<style>
+  /* System font fallbacks — page works fully if Google Fonts is unavailable */
+  :root {
+    --font-display: 'Orbitron', 'Courier New', 'Lucida Console', monospace;
+    --font-label:   'Rajdhani', 'Arial Narrow', Arial, sans-serif;
+    --font-body:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+</style>
 <style>
   :root {
     --bg-primary: #0a0b0f;
@@ -1417,18 +1428,24 @@ const DEFAULT_HABITS = [
 // The total XP of all sourceIds is summed and split equally among receiverIds on weekends.
 // ═══════════════════════════════════════════════════════
 // ══════════════════════════════════════════════════════════════════════
-// LATE PENALTY CONFIG
-// Each entry: { id, deadline: 'HH:MM', penaltyPerMin, maxPenalty, crossesMidnight }
+// LATE PENALTY CONFIG — 1% of habit XP per minute late, floors at 0
+//
+// Each entry: { id, deadline: 'HH:MM', crossesMidnight }
 //   deadline        — the on-time cutoff (HH:MM, 24h)
-//   penaltyPerMin   — XP lost per minute late (can be decimal)
-//   maxPenalty      — cap: never deduct more than this (usually = full habit XP)
-//   crossesMidnight — true for sleep: deadline is "before midnight", tick after midnight
-//                     counts as late for the PREVIOUS day
+//   crossesMidnight — true for sleep: ticks between 00:00–05:59 are
+//                     treated as "after midnight" of the previous night
+//
+// How it works:
+//   - Every minute late removes 1% of the habit's full XP value
+//   - At 100 minutes late the habit reaches exactly 0 XP (fully wiped)
+//   - Beyond 100 minutes it stays at 0 — never goes negative
+//   - The deduction is always based on the habit's FULL base XP,
+//     not the already-reduced value, so the % is consistent
 // ══════════════════════════════════════════════════════════════════════
 const DEFAULT_LATE_PENALTIES = [
-  { id: 'reachwork', deadline: '09:00', penaltyPerMin: 0.05, maxPenalty: 5   },
-  { id: 'work',      deadline: '18:00', penaltyPerMin: 0.05, maxPenalty: 5   },
-  { id: 'sleep12',   deadline: '23:59', penaltyPerMin: 0.10, maxPenalty: 10, crossesMidnight: true },
+  { id: 'reachwork', deadline: '09:00' },
+  { id: 'work',      deadline: '18:00' },
+  { id: 'sleep12',   deadline: '23:59', crossesMidnight: true },
 ];
 
 function getLatePenalties() {
@@ -1444,50 +1461,64 @@ function saveLatePenalties(arr) {
 
 /**
  * Returns the XP deduction for a habit given its tick time.
- * tickTime: 'HH:MM' string or null.
- * Returns a positive number (amount to deduct), or 0 if on time / no time.
+ * Uses 1% of the habit's full XP per minute late, capped at 100% (floor 0).
+ *
+ * habitId:  the habit id string
+ * tickTime: 'HH:MM' string (24h) or null
+ * dateStr:  'YYYY-MM-DD' for looking up the habit's full XP
+ * habits:   the full habits array (to get base XP)
+ *
+ * Returns a positive number (XP to deduct), or 0 if on time / no time recorded.
  */
-function computeLateDeduction(habitId, tickTime, dateStr) {
+function computeLateDeduction(habitId, tickTime, dateStr, habits) {
   if (!tickTime) return 0;
   const penalties = getLatePenalties();
   const cfg = penalties.find(p => p.id === habitId);
   if (!cfg) return 0;
 
+  // Get the habit's full effective XP for this day (the 100% baseline)
+  const habitList = habits || getHabits();
+  const habit = habitList.find(h => h.id === habitId);
+  if (!habit) return 0;
+  const fullXP = getEffectiveXP(habit, dateStr, habitList);
+  if (fullXP <= 0) return 0;
+
   const [th, tm] = tickTime.split(':').map(Number);
   const [dh, dm] = cfg.deadline.split(':').map(Number);
-
   let tickMins     = th * 60 + tm;
   let deadlineMins = dh * 60 + dm;
 
-  // crossesMidnight: ticks from 00:00–05:59 count as next day's early morning
-  // but for the previous day's sleep record (e.g. ticking at 01:30 = 90 mins past midnight)
+  let minsLate = 0;
+
   if (cfg.crossesMidnight) {
     if (tickMins < 6 * 60) {
-      // After midnight — late by: (24*60 - deadlineMins) + tickMins
-      const minsLate = (24 * 60 - deadlineMins) + tickMins;
-      const deduction = Math.round(Math.min(minsLate * cfg.penaltyPerMin, cfg.maxPenalty) * 100) / 100;
-      return deduction;
+      // Ticked after midnight (00:00–05:59) — calculate minutes past the deadline
+      minsLate = (24 * 60 - deadlineMins) + tickMins;
+    } else if (tickMins <= deadlineMins) {
+      return 0; // on time (ticked before deadline e.g. 22:00)
+    } else {
+      minsLate = tickMins - deadlineMins;
     }
-    // Ticked before midnight cutoff (e.g. 22:00) → on time
+  } else {
     if (tickMins <= deadlineMins) return 0;
-    const minsLate = tickMins - deadlineMins;
-    return Math.round(Math.min(minsLate * cfg.penaltyPerMin, cfg.maxPenalty) * 100) / 100;
+    minsLate = tickMins - deadlineMins;
   }
 
-  if (tickMins <= deadlineMins) return 0;
-  const minsLate = tickMins - deadlineMins;
-  return Math.round(Math.min(minsLate * cfg.penaltyPerMin, cfg.maxPenalty) * 100) / 100;
+  // 1% of fullXP per minute, capped at 100% (i.e. max deduction = fullXP)
+  const pctLost  = Math.min(minsLate, 100) / 100;     // 0.0 → 1.0
+  const deduction = Math.round(fullXP * pctLost * 100) / 100;
+  return deduction;
 }
 
 /**
  * Total late deduction for a checked set + tick times on a given day.
  */
-function totalLateDeduction(checked, tickTimes, dateStr) {
+function totalLateDeduction(checked, tickTimes, dateStr, habits) {
   let total = 0;
   const penalties = getLatePenalties();
   penalties.forEach(cfg => {
     if (checked && checked[cfg.id] && tickTimes && tickTimes[cfg.id]) {
-      total += computeLateDeduction(cfg.id, tickTimes[cfg.id], dateStr);
+      total += computeLateDeduction(cfg.id, tickTimes[cfg.id], dateStr, habits);
     }
   });
   return Math.round(total * 100) / 100;
@@ -1757,7 +1788,7 @@ function computeXP(checked, dateStr, habits, tickTimes) {
     if (h.bonus && !normalFull) return; // bonus XP locked until 100% normal done
     xp += getEffectiveXP(h, dateStr, habits);
   });
-  const penalty = tickTimes ? totalLateDeduction(checked, tickTimes, dateStr) : 0;
+  const penalty = tickTimes ? totalLateDeduction(checked, tickTimes, dateStr, habits) : 0;
   return Math.round(Math.max(0, xp - penalty) * 100) / 100;
 }
 
@@ -1767,7 +1798,7 @@ function computeNormalXP(checked, dateStr, habits, tickTimes) {
   habits.filter(h => !h.bonus).forEach(h => {
     if (checked && checked[h.id]) xp += getEffectiveXP(h, dateStr, habits);
   });
-  const penalty = tickTimes ? totalLateDeduction(checked, tickTimes, dateStr) : 0;
+  const penalty = tickTimes ? totalLateDeduction(checked, tickTimes, dateStr, habits) : 0;
   return Math.round(Math.max(0, xp - penalty) * 100) / 100;
 }
 
@@ -1844,7 +1875,7 @@ function renderHabits() {
       if (bonusDimmed) item.style.opacity = '0.35';
 
       let timeBadgeHtml = '';
-      const lateDeduction = isChecked && tickTime ? computeLateDeduction(h.id, tickTime, today) : 0;
+      const lateDeduction = isChecked && tickTime ? computeLateDeduction(h.id, tickTime, today, habits) : 0;
       if (isChecked) {
         if (tickTime) {
           const lateLabel = lateDeduction > 0
@@ -3033,7 +3064,7 @@ function refreshAdjPreview() {
     }
 
     // Late penalty display per row
-    const deduction = cb.checked && ti.value ? computeLateDeduction(id, ti.value, dateStr) : 0;
+    const deduction = cb.checked && ti.value ? computeLateDeduction(id, ti.value, dateStr, habits) : 0;
     const effXP = getEffectiveXP(h, dateStr, habits);
     const net   = Math.max(0, effXP - deduction);
 
@@ -3054,7 +3085,7 @@ function refreshAdjPreview() {
   const bonusXP   = computeXP(checked, dateStr, habits, times) - normalXP;
   const pct       = normalMax > 0 ? Math.min(100, Math.round(normalXP / normalMax * 100)) : 0;
 
-  const lateTot   = totalLateDeduction(checked, times, dateStr);
+  const lateTot   = totalLateDeduction(checked, times, dateStr, habits);
   const previewEl = document.getElementById('adj-score-preview');
   previewEl.innerHTML = `
     Score: <strong style="color:var(--accent-cyan)">${fmtXP(normalXP)} XP</strong>

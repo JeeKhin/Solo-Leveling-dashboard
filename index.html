@@ -1404,10 +1404,12 @@
 
 const DEFAULT_HABITS = [
   { id:'god',       name:'Spend time with God',   xp:10,   group:'Spirit',   weekdayOnly:false },
-  { id:'workout',   name:'Workout',               xp:15,   group:'Body',     weekdayOnly:false },
+  { id:'workout',   name:'Workout',               xp:5,    group:'Body',     weekdayOnly:false },
   { id:'breakfast', name:'Breakfast',             xp:5,    group:'Body',     weekdayOnly:false },
   { id:'shower',    name:'Shower',                xp:5,    group:'Body',     weekdayOnly:false },
   { id:'reading',   name:'Reading',               xp:10,   group:'Mind',     weekdayOnly:false },
+  { id:'youtube',   name:'YouTube',               xp:15,   group:'Mind',     weekdayOnly:false },
+  { id:'gaming',    name:'Gaming',                xp:15,   group:'Mind',     weekdayOnly:false },
   { id:'work',      name:'Leave Work On Time',    xp:5,    group:'Work',     weekdayOnly:true  },
   { id:'reachwork', name:'Reached Work On Time',  xp:5,    group:'Work',     weekdayOnly:true  },
   { id:'sleep12',   name:'Sleep before 12 am',   xp:10,   group:'Recovery', weekdayOnly:false },
@@ -1416,8 +1418,6 @@ const DEFAULT_HABITS = [
   { id:'water3',    name:'Water 1.5L',            xp:3.75, group:'Hydration',weekdayOnly:false, waterTier:3 },
   { id:'water4',    name:'Water 2L',              xp:3.75, group:'Hydration',weekdayOnly:false, waterTier:4 },
   { id:'instagram', name:'Instagram',             xp:1.25, group:'Wins',     weekdayOnly:false, bonus:true },
-  { id:'youtube',   name:'YouTube',               xp:1.25, group:'Wins',     weekdayOnly:false, bonus:true },
-  { id:'gaming',    name:'Gaming',                xp:1.25, group:'Wins',     weekdayOnly:false, bonus:true },
   { id:'movie',     name:'Movie',                 xp:1.25, group:'Wins',     weekdayOnly:false, bonus:true },
 ];
 
@@ -1603,14 +1603,26 @@ function getState() {
 function saveState(s) {
   localStorage.setItem('hd_state', JSON.stringify(s));
 }
+// Bump this version whenever DEFAULT_HABITS changes structure or values.
+// Any stored config from an older version gets replaced with the new defaults.
+const HABITS_SCHEMA_VERSION = 3; // v3: Gaming+YouTube moved to Mind at 15xp, Workout→5xp
+
 function getHabits() {
   try {
+    const storedVersion = parseInt(localStorage.getItem('hd_habits_ver') || '0');
+    if (storedVersion < HABITS_SCHEMA_VERSION) {
+      // Outdated config — clear it and use fresh defaults
+      localStorage.removeItem('hd_habits');
+      localStorage.setItem('hd_habits_ver', HABITS_SCHEMA_VERSION);
+      return DEFAULT_HABITS;
+    }
     const h = JSON.parse(localStorage.getItem('hd_habits') || 'null');
     return h || DEFAULT_HABITS;
   } catch { return DEFAULT_HABITS; }
 }
 function saveHabitsConfig(h) {
   localStorage.setItem('hd_habits', JSON.stringify(h));
+  localStorage.setItem('hd_habits_ver', HABITS_SCHEMA_VERSION);
 }
 function getHistory() {
   try { return JSON.parse(localStorage.getItem('hd_history') || '{}'); } catch { return {}; }
@@ -1781,11 +1793,9 @@ function isNormal100(checked, dateStr, habits) {
 }
 
 function computeXP(checked, dateStr, habits, tickTimes) {
-  const normalFull = isNormal100(checked, dateStr, habits);
   let xp = 0;
   habits.forEach(h => {
     if (!checked || !checked[h.id]) return;
-    if (h.bonus && !normalFull) return; // bonus XP locked until 100% normal done
     xp += getEffectiveXP(h, dateStr, habits);
   });
   const penalty = tickTimes ? totalLateDeduction(checked, tickTimes, dateStr, habits) : 0;
@@ -1821,7 +1831,6 @@ function renderHabits() {
   const locked = false; // locking removed — checkboxes always editable
   const today = todayKey();
   const weekend = isWeekend(today);
-  const normal100 = isNormal100(checked, today, habits); // whether bonus XP is unlocked
 
   const groups = groupHabits(habits);
   let groupIdx = 1;
@@ -1829,10 +1838,9 @@ function renderHabits() {
   Object.entries(groups).forEach(([groupName, groupHabits]) => {
     const isWinsGroup = groupHabits.every(h => h.bonus);
 
-    // Group XP: bonus habits only count if normal100
+    // Group XP: bonus habits always count now (no 100% gate)
     const groupXP = groupHabits.reduce((s,h) => {
       if (!checked[h.id]) return s;
-      if (h.bonus && !normal100) return s;
       return s + getEffectiveXP(h, today, habits);
     }, 0);
     const groupMaxXP = groupHabits.reduce((s,h) => s + getEffectiveXP(h, today, habits), 0);
@@ -1840,9 +1848,9 @@ function renderHabits() {
     const groupEl = document.createElement('div');
     groupEl.className = 'habit-group';
 
-    // Wins group gets a gold-tinted header and a lock indicator
-    const bonusLockHtml = isWinsGroup
-      ? `<span style="font-size:10px;color:${normal100 ? 'var(--accent-gold)' : 'var(--text-muted)'};margin-left:6px;font-family:'Rajdhani',sans-serif;letter-spacing:1px;">${normal100 ? '⭐ UNLOCKED' : '🔒 REACH 100%'}</span>`
+    // Wins group gets a gold-tinted header (no lock indicator)
+    const bonusLabel = isWinsGroup
+      ? `<span style="font-size:10px;color:var(--accent-gold);margin-left:6px;font-family:'Rajdhani',sans-serif;letter-spacing:1px;">⭐ BONUS</span>`
       : '';
 
     groupEl.innerHTML = `
@@ -1850,7 +1858,7 @@ function renderHabits() {
         <div class="group-left">
           <span class="group-num">${groupIdx}</span>
           <span class="group-name" style="${isWinsGroup ? 'color:var(--accent-gold)' : ''}">${groupName}</span>
-          ${bonusLockHtml}
+          ${bonusLabel}
         </div>
         <div class="group-right">
           <span class="group-progress-text" style="${isWinsGroup ? 'color:var(--accent-gold)' : ''}">${fmtXP(groupXP)}/${fmtXP(groupMaxXP)} XP</span>
@@ -1862,17 +1870,14 @@ function renderHabits() {
 
     const body = groupEl.querySelector('.habit-group-body');
     groupHabits.forEach(h => {
-      const isDisabled = (h.weekdayOnly && weekend); // bonus habits dim but remain clickable; locking removed
+      const isDisabled = (h.weekdayOnly && weekend);
       const isChecked = !!checked[h.id];
       const effectiveXP = getEffectiveXP(h, today, habits);
       const hasWeekendBonus = weekend && getWeekendCfg().receiverIds.includes(h.id);
       const tickTime = tickTimes[h.id] || null;
 
       const item = document.createElement('div');
-      // bonus habits dim when locked (not 100%)
-      const bonusDimmed = h.bonus && !normal100;
-      item.className = `habit-item${isChecked && !bonusDimmed?' completed':''}${(h.weekdayOnly && weekend)?' disabled':''}${h.waterTier?' water-tier':''}`;
-      if (bonusDimmed) item.style.opacity = '0.35';
+      item.className = `habit-item${isChecked?' completed':''}${isDisabled?' disabled':''}${h.waterTier?' water-tier':''}`;
 
       let timeBadgeHtml = '';
       const lateDeduction = isChecked && tickTime ? computeLateDeduction(h.id, tickTime, today, habits) : 0;
